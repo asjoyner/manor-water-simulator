@@ -133,16 +133,16 @@ const PlumbingDiagram = ({
 
         {/* ===== APOLLO MIXING VALVE (same height as tanks) ===== */}
         <rect x="450" y="110" width="50" height="100" rx="8" fill={bronzeColor} stroke="#92400e" strokeWidth="2" />
-        <circle cx="475" cy="178" r="15" fill="#92400e" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-        <text x="475" y="181" textAnchor="middle" fill="white" style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '1px' }}>MIXING</text>
-        <text x="463" y="148" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">{leftPortIsHot ? 'HOT' : 'COLD'}</text>
-        <text x="463" y="207" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">{leftPortIsHot ? 'COLD' : 'HOT'}</text>
+        <circle cx="475" cy="160" r="15" fill="#92400e" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+        <text x="475" y="163" textAnchor="middle" fill="white" style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '1px' }}>MIXING</text>
+        <text x="475" y="130" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">{leftPortIsHot ? 'HOT' : 'COLD'}</text>
+        <text x="475" y="198" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">{leftPortIsHot ? 'COLD' : 'HOT'}</text>
         <text x="475" y="220" textAnchor="middle" fill="#818cf8" fontSize="9" fontWeight="bold">SET: {setpoint}°F</text>
 
         {/* ===== VALVE OUTPUT → RIGHT PAST PUMPS → DOWN ===== */}
-        <path d="M 500 178 L 575 178 L 575 240 L 562 240" fill="none" stroke={mixedColor} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 500 178 L 575 178 L 575 240 L 562 240" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
-        <text x="540" y="192" fill={mixedColor} fontSize="10" fontWeight="bold">{tMixed.toFixed(1)}°F</text>
+        <path d="M 500 160 L 575 160 L 575 240 L 562 240" fill="none" stroke={mixedColor} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 500 160 L 575 160 L 575 240 L 562 240" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <text x="540" y="174" fill={mixedColor} fontSize="10" fontWeight="bold">{tMixed.toFixed(1)}°F</text>
 
         {/* ===== RECIRC PUMPS ===== */}
 
