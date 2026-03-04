@@ -182,12 +182,12 @@ function App() {
   const RECIRC_FLOW_GPM = 1; // total recirc flow (~0.5 GPM per pump)
 
   // Preheat + Rheem state
-  const [preheatTargetTemp, setPreheatTargetTemp] = useState(104);
+  const [preheatTargetTemp, setPreheatTargetTemp] = useState(113);
   const [rheemTargetTemp, setRheemTargetTemp] = useState(135);
   const [coldInTemp, setColdInTemp] = useState(60);
   const [preheatCapacity] = useState(119);
   const [rheem80Capacity] = useState(80);
-  const [preheatRecoveryRate, setPreheatRecoveryRate] = useState(109);
+  const [preheatRecoveryRate, setPreheatRecoveryRate] = useState(90);
   const [rheemRecoveryRate, setRheemRecoveryRate] = useState(7);
   const [preheatLayers, setPreheatLayers] = useState(new Array(10).fill(100));
   const [rheem80Layers, setRheem80Layers] = useState(new Array(10).fill(135));
