@@ -107,37 +107,38 @@ const PlumbingDiagram = ({
         {flowRate > 0 && <path d="M 280 155 L 310 155" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
         <circle cx="310" cy="155" r="4" fill="#52525b" />
 
-        {/* ===== BYPASS PATH: TEE → up → across (above tankless) → down into valve upper port ===== */}
-        <path d="M 310 155 L 310 110 L 450 110 L 450 143" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="8" />
-        {tankFlow > 0.1 && <path d="M 310 155 L 310 110 L 450 110 L 450 143" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tankFlow) }} />}
-        <text x="380" y="105" textAnchor="middle" fill={getTempColor(rheemOut)} fontSize="8" fontWeight="bold">{rheemOut.toFixed(0)}°F</text>
+        {/* ===== BYPASS PATH: TEE → straight to valve upper port ===== */}
+        <path d="M 310 155 L 450 155" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="8" />
+        {tankFlow > 0.1 && <path d="M 310 155 L 450 155" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tankFlow) }} />}
+        <text x="380" y="148" textAnchor="middle" fill={getTempColor(rheemOut)} fontSize="8" fontWeight="bold">{rheemOut.toFixed(0)}°F</text>
 
-        {/* ===== TANKLESS PATH: TEE → down → right into tankless ===== */}
-        <path d="M 310 155 L 310 160 L 360 160" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" opacity="0.8" />
-        {tanklessFlow > 0.1 && <path d="M 310 155 L 310 160 L 360 160" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
+        {/* ===== TANKLESS PATH: TEE → down → right into tankless (below bypass) ===== */}
+        <path d="M 310 155 L 310 200 L 360 200" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" opacity="0.8" />
+        {tanklessFlow > 0.1 && <path d="M 310 155 L 310 200 L 360 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
 
-        {/* ===== RINNAI TANKLESS (same center-line as tanks) ===== */}
-        <rect x="360" y="130" width="60" height="60" rx="5" fill="#27272a" stroke={isTanklessLimited ? "#ef4444" : "#3f3f46"} strokeWidth="2" />
-        <path d="M 370 140 L 410 140 L 370 155 L 410 155 L 370 170 L 410 170" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="2" />
-        <text x="390" y="100" textAnchor="middle" fill={isTanklessLimited ? "#ef4444" : "#eee"} fontSize="9" fontWeight="bold">Tankless Heater</text>
-        <text x="390" y="163" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">{tTanklessActual.toFixed(1)}°F</text>
+        {/* ===== RINNAI TANKLESS (below bypass pipe) ===== */}
+        <rect x="360" y="170" width="60" height="60" rx="5" fill="#27272a" stroke={isTanklessLimited ? "#ef4444" : "#3f3f46"} strokeWidth="2" />
+        <path d="M 370 180 L 410 180 L 370 195 L 410 195 L 370 210 L 410 210" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="2" />
+        <text x="390" y="242" textAnchor="middle" fill={isTanklessLimited ? "#ef4444" : "#eee"} fontSize="9" fontWeight="bold">Tankless Heater</text>
+        <text x="390" y="203" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">{tTanklessActual.toFixed(1)}°F</text>
 
         {/* ===== TANKLESS → VALVE LOWER PORT ===== */}
-        <path d="M 420 160 L 435 160 L 435 172 L 450 172" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="8" />
-        {tanklessFlow > 0.1 && <path d="M 420 160 L 435 160 L 435 172 L 450 172" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
+        <path d="M 420 200 L 435 200 L 435 178 L 450 178" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="8" />
+        {tanklessFlow > 0.1 && <path d="M 420 200 L 435 200 L 435 178 L 450 178" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
+        <text x="442" y="198" textAnchor="end" fill={getTempColor(tTanklessActual)} fontSize="8" fontWeight="bold">{tTanklessActual.toFixed(0)}°F</text>
 
         {/* ===== APOLLO MIXING VALVE (sideways: inputs left, output right) ===== */}
-        <rect x="450" y="120" width="50" height="75" rx="8" fill={bronzeColor} stroke="#92400e" strokeWidth="2" />
-        <circle cx="475" cy="157" r="15" fill="#92400e" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-        <text x="475" y="160" textAnchor="middle" fill="white" style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '1px' }}>MIXING</text>
-        <text x="463" y="135" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">{leftPortIsHot ? 'HOT' : 'COLD'}</text>
-        <text x="463" y="188" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">{leftPortIsHot ? 'COLD' : 'HOT'}</text>
+        <rect x="450" y="130" width="50" height="65" rx="8" fill={bronzeColor} stroke="#92400e" strokeWidth="2" />
+        <circle cx="475" cy="166" r="15" fill="#92400e" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+        <text x="475" y="169" textAnchor="middle" fill="white" style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '1px' }}>MIXING</text>
+        <text x="463" y="145" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">{leftPortIsHot ? 'HOT' : 'COLD'}</text>
+        <text x="463" y="190" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">{leftPortIsHot ? 'COLD' : 'HOT'}</text>
         <text x="475" y="207" textAnchor="middle" fill="#818cf8" fontSize="9" fontWeight="bold">SET: {setpoint}°F</text>
 
         {/* ===== VALVE OUTPUT → TEE (short right then down) ===== */}
-        <path d="M 500 157 L 515 157 L 515 210" fill="none" stroke={mixedColor} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 500 157 L 515 157 L 515 210" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
-        <text x="527" y="155" fill={mixedColor} fontSize="10" fontWeight="bold">{tMixed.toFixed(1)}°F</text>
+        <path d="M 500 166 L 515 166 L 515 210" fill="none" stroke={mixedColor} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 500 166 L 515 166 L 515 210" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <text x="527" y="164" fill={mixedColor} fontSize="10" fontWeight="bold">{tMixed.toFixed(1)}°F</text>
         <circle cx="515" cy="210" r="3" fill="#52525b" />
 
         {/* ===== RECIRC PUMPS ===== */}
