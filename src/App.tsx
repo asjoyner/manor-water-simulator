@@ -35,26 +35,26 @@ const PlumbingDiagram = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#f4f4f5' }}>System Visualization</h3>
       </div>
-      <svg viewBox="0 0 540 340" style={{ width: '100%', height: 'auto', display: 'block' }}>
+      <svg viewBox="0 0 565 315" style={{ width: '100%', height: 'auto', display: 'block' }}>
 
         {/* ===== NON-POTABLE HEATING LOOP (above & left of preheat tank) ===== */}
 
         {/* Heat pump — above preheat tank */}
         <rect x="60" y="10" width="110" height="35" rx="5" fill="#1e3a5f" stroke="#3b82f6" strokeWidth="1.5" />
-        <text x="115" y="25" textAnchor="middle" fill="#93c5fd" fontSize="7" fontWeight="bold">Mitsubishi-Trane</text>
-        <text x="115" y="36" textAnchor="middle" fill="#93c5fd" fontSize="6">TPWFYP036AU141A</text>
+        <text x="115" y="25" textAnchor="middle" fill="#93c5fd" fontSize="7" fontWeight="bold">Air-Source</text>
+        <text x="115" y="36" textAnchor="middle" fill="#93c5fd" fontSize="6">Heat Pump</text>
 
         {/* Circulator pump — left of preheat, below heat pump */}
         <circle cx="40" cy="75" r="12" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
         <text x="40" y="78" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
-        <text x="40" y="100" textAnchor="middle" fill="#71717a" fontSize="6">Grundfos</text>
-        <text x="40" y="109" textAnchor="middle" fill="#71717a" fontSize="6">UP15-29SF</text>
+        <text x="40" y="100" textAnchor="middle" fill="#71717a" fontSize="6">Circulator</text>
+        <text x="40" y="109" textAnchor="middle" fill="#71717a" fontSize="6">Pump</text>
 
         {/* Buffer tank — left of preheat tank */}
         <rect x="25" y="120" width="30" height="50" rx="4" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
         <text x="40" y="140" textAnchor="middle" fill="#a1a1aa" fontSize="6" fontWeight="bold">20G</text>
         <text x="40" y="150" textAnchor="middle" fill="#a1a1aa" fontSize="6">Buffer</text>
-        <text x="40" y="180" textAnchor="middle" fill="#71717a" fontSize="6">Robin Wood</text>
+        <text x="40" y="180" textAnchor="middle" fill="#71717a" fontSize="6">Buffer Tank</text>
 
         {/* Non-potable loop piping (dashed blue = non-potable) */}
         <path d="M 70 45 L 70 55 L 40 55 L 40 63" fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 2" />
@@ -74,8 +74,8 @@ const PlumbingDiagram = ({
         {preheatLayers.map((temp: number, i: number) => (
           <rect key={`p${i}`} x="105" y={110 + (i * 9)} width="50" height="9" fill={getTempColor(temp)} opacity="0.9" />
         ))}
-        <text x="130" y="95" textAnchor="middle" fill="#eee" fontSize="9" fontWeight="bold">HTP GL119</text>
-        <text x="130" y="85" textAnchor="middle" fill="#a1a1aa" fontSize="8">({preheatCapacity}G Preheat)</text>
+        <text x="130" y="95" textAnchor="middle" fill="#eee" fontSize="9" fontWeight="bold">{preheatCapacity}G Indirect</text>
+        <text x="130" y="85" textAnchor="middle" fill="#a1a1aa" fontSize="8">Preheat Tank</text>
         <text x="130" y="123" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{preheatLayers[0].toFixed(0)}°F</text>
         <text x="130" y="195" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{preheatLayers[preheatLayers.length-1].toFixed(0)}°F</text>
 
@@ -89,8 +89,8 @@ const PlumbingDiagram = ({
         {rheem80Layers.map((temp: number, i: number) => (
           <rect key={`r${i}`} x="225" y={120 + (i * 9)} width="50" height="9" fill={getTempColor(temp)} opacity="0.9" />
         ))}
-        <text x="250" y="105" textAnchor="middle" fill="#eee" fontSize="9" fontWeight="bold">Rheem PROPH80</text>
-        <text x="250" y="230" textAnchor="middle" fill="#a1a1aa" fontSize="8">({rheem80Capacity}G Heat Pump)</text>
+        <text x="250" y="105" textAnchor="middle" fill="#eee" fontSize="9" fontWeight="bold">{rheem80Capacity}G Heat Pump</text>
+        <text x="250" y="230" textAnchor="middle" fill="#a1a1aa" fontSize="8">Water Heater</text>
         <text x="250" y="133" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{rheem80Layers[0].toFixed(0)}°F</text>
         <text x="250" y="205" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{rheem80Layers[rheem80Layers.length-1].toFixed(0)}°F</text>
 
@@ -113,7 +113,7 @@ const PlumbingDiagram = ({
         {/* ===== RINNAI TANKLESS ===== */}
         <rect x="400" y="165" width="60" height="60" rx="5" fill="#27272a" stroke={isTanklessLimited ? "#ef4444" : "#3f3f46"} strokeWidth="2" />
         <path d="M 410 180 L 450 180 L 410 195 L 450 195 L 410 210 L 450 210" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="2" />
-        <text x="430" y="237" textAnchor="middle" fill={isTanklessLimited ? "#ef4444" : "#eee"} fontSize="9" fontWeight="bold">Rinnai RX199iN</text>
+        <text x="430" y="237" textAnchor="middle" fill={isTanklessLimited ? "#ef4444" : "#eee"} fontSize="9" fontWeight="bold">Tankless Heater</text>
         <text x="430" y="200" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">{tTanklessActual.toFixed(1)}°F</text>
 
         {/* Tankless → valve */}
@@ -123,7 +123,7 @@ const PlumbingDiagram = ({
         {/* ===== APOLLO MIXING VALVE ===== */}
         <rect x="330" y="75" width="200" height="55" rx="8" fill={bronzeColor} stroke="#92400e" strokeWidth="2" />
         <circle cx="430" cy="102" r="20" fill="#92400e" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-        <text x="430" y="106" textAnchor="middle" fill="white" style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '1px' }}>APOLLO</text>
+        <text x="430" y="106" textAnchor="middle" fill="white" style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '1px' }}>MIXING</text>
         <text x="360" y="120" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">{leftPortIsHot ? 'HOT' : 'COLD'}</text>
         <text x="500" y="120" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">{leftPortIsHot ? 'COLD' : 'HOT'}</text>
         <text x="500" y="142" textAnchor="middle" fill="#818cf8" fontSize="9" fontWeight="bold">SET: {setpoint}°F</text>
@@ -131,34 +131,33 @@ const PlumbingDiagram = ({
         {/* ===== VALVE OUTPUT → RECIRC ===== */}
 
         {/* Valve output up, then right, then down the right edge */}
-        <path d="M 430 75 L 430 60 L 525 60 L 525 272" fill="none" stroke={mixedColor} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 430 75 L 430 60 L 525 60 L 525 272" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <path d="M 430 75 L 430 60 L 545 60 L 545 272" fill="none" stroke={mixedColor} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 430 75 L 430 60 L 545 60 L 545 272" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
         <text x="450" y="55" fill={mixedColor} fontSize="10" fontWeight="bold">{tMixed.toFixed(1)}°F</text>
 
         {/* Tee to two recirc pumps */}
-        <circle cx="525" cy="272" r="3" fill="#52525b" />
+        <circle cx="545" cy="272" r="3" fill="#52525b" />
 
         {/* Pump 1 → Upstairs Loop */}
-        <path d="M 525 272 L 525 260 L 518 260" fill="none" stroke={mixedColor} strokeWidth="3" />
-        <circle cx="505" cy="260" r="10" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
-        <text x="505" y="263" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
-        <text x="505" y="246" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Upstairs Loop</text>
+        <path d="M 545 272 L 545 260 L 525 260" fill="none" stroke={mixedColor} strokeWidth="3" />
+        <circle cx="512" cy="260" r="10" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
+        <text x="512" y="263" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
+        <text x="512" y="246" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Upstairs Loop</text>
 
         {/* Pump 2 → Main/Basement Loop */}
-        <path d="M 525 272 L 525 292 L 518 292" fill="none" stroke={mixedColor} strokeWidth="3" />
-        <circle cx="505" cy="292" r="10" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
-        <text x="505" y="295" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
-        <text x="505" y="312" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Main/Basement</text>
-        <text x="505" y="320" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Loop</text>
+        <path d="M 545 272 L 545 292 L 525 292" fill="none" stroke={mixedColor} strokeWidth="3" />
+        <circle cx="512" cy="292" r="10" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
+        <text x="512" y="295" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
+        <text x="512" y="312" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Main/Basement</text>
 
-        {/* Grundfos label */}
-        <text x="525" y="278" textAnchor="start" fill="#71717a" fontSize="6">Grundfos</text>
-        <text x="525" y="286" textAnchor="start" fill="#71717a" fontSize="6">UP15-29SF</text>
+        {/* Recirc pump label */}
+        <text x="545" y="278" textAnchor="start" fill="#71717a" fontSize="6">Recirc</text>
+        <text x="545" y="286" textAnchor="start" fill="#71717a" fontSize="6">Pumps</text>
 
         {/* Return paths merge and go back to Rheem bottom */}
-        <path d="M 493 260 L 460 260 L 460 330 L 250 330 L 250 215" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
-        <path d="M 493 292 L 460 292" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
-        <text x="355" y="327" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirc Return</text>
+        <path d="M 500 260 L 470 260 L 470 305 L 250 305 L 250 215" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        <path d="M 500 292 L 470 292" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        <text x="360" y="302" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirc Return</text>
       </svg>
     </div>
   );
@@ -283,8 +282,8 @@ function App() {
                 <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Cold Inlet Temp: <span style={{ color: '#fafafa' }}>{coldInTemp}°F</span></label><input type="range" min="35" max="80" value={coldInTemp} onChange={e => setColdInTemp(parseInt(e.target.value))} style={sliderStyle} /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}>
-                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Preheat Target (GL119): <span style={{ color: '#fafafa' }}>{preheatTargetTemp}°F</span></label><input type="range" min="70" max="130" value={preheatTargetTemp} onChange={e => setPreheatTargetTemp(parseInt(e.target.value))} style={sliderStyle} /></div>
-                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Rheem Target (PROPH80): <span style={{ color: '#fafafa' }}>{rheemTargetTemp}°F</span></label><input type="range" min="100" max="160" value={rheemTargetTemp} onChange={e => setRheemTargetTemp(parseInt(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Preheat Target: <span style={{ color: '#fafafa' }}>{preheatTargetTemp}°F</span></label><input type="range" min="70" max="130" value={preheatTargetTemp} onChange={e => setPreheatTargetTemp(parseInt(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Water Heater Target: <span style={{ color: '#fafafa' }}>{rheemTargetTemp}°F</span></label><input type="range" min="100" max="160" value={rheemTargetTemp} onChange={e => setRheemTargetTemp(parseInt(e.target.value))} style={sliderStyle} /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}>
                 <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Preheat Recovery: <span style={{ color: '#fafafa' }}>{preheatRecoveryRate} GPH</span></label><input type="range" min="5" max="60" value={preheatRecoveryRate} onChange={e => setPreheatRecoveryRate(parseInt(e.target.value))} style={sliderStyle} /></div>
