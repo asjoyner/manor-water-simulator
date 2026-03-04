@@ -280,9 +280,17 @@ function App() {
   const preheatBTUh = preheatRecoveryRate * 8.34 * Math.max(0, preheatTargetTemp - coldInTemp);
   const rheemBTUh = rheemRecoveryRate * 8.34 * rheemDeltaT;
 
-  // Optimal flow = combined tank recovery BTU/h / energy per gallon at setpoint
-  // Both preheat and Rheem contribute recovery BTU/h in series
-  const maxOptimalGPM = (preheatBTUh + rheemBTUh) / (500.4 * Math.max(1, setpoint - coldInTemp));
+  // Optimal flow: max GPM at setpoint sustainable by tank recovery alone
+  // Tanks are in series: preheat heats cold→preheatTarget, Rheem heats preheatTarget→setpoint
+  // Bottleneck is whichever tank has less capacity relative to its required ΔT
+  const rheemGapTemp = setpoint - preheatTargetTemp;
+  const maxOptimalGPM = rheemGapTemp <= 0
+    ? preheatBTUh / (500.4 * Math.max(1, setpoint - coldInTemp))
+    : rheemTargetTemp < setpoint ? 0
+    : Math.min(
+        preheatBTUh / (500.4 * Math.max(1, preheatTargetTemp - coldInTemp)),
+        rheemBTUh / (500.4 * rheemGapTemp)
+      );
   const tanklessBTUh = maxRinnaiBTU;
   const demandBTUh = flowRate * 500.4 * Math.max(0, tMixed - coldInTemp);
   const gallonsPerPreheatLayer = preheatCapacity / preheatLayers.length;
