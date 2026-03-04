@@ -57,11 +57,15 @@ const PlumbingDiagram = ({
         <text x="40" y="150" textAnchor="middle" fill="#a1a1aa" fontSize="6">Buffer</text>
         <text x="40" y="180" textAnchor="middle" fill="#71717a" fontSize="6">Buffer Tank</text>
 
-        {/* Non-potable loop piping (dashed blue = non-potable) */}
+        {/* Non-potable loop piping (dashed blue = non-potable, always circulating) */}
         <path d="M 70 45 L 70 55 L 40 55 L 40 63" fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 2" />
+        <path d="M 70 45 L 70 55 L 40 55 L 40 63" fill="none" stroke="white" strokeWidth="1.5" className="flow-line" style={{ animationDuration: '2s' }} />
         <path d="M 40 87 L 40 120" fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 2" />
+        <path d="M 40 87 L 40 120" fill="none" stroke="white" strokeWidth="1.5" className="flow-line" style={{ animationDuration: '2s' }} />
         <path d="M 55 155 L 100 155" fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 2" />
+        <path d="M 55 155 L 100 155" fill="none" stroke="white" strokeWidth="1.5" className="flow-line" style={{ animationDuration: '2s' }} />
         <path d="M 100 125 L 20 125 L 20 55 L 80 55 L 80 45" fill="none" stroke="#4b8cc4" strokeWidth="2" strokeDasharray="4 2" />
+        <path d="M 100 125 L 20 125 L 20 55 L 80 55 L 80 45" fill="none" stroke="white" strokeWidth="1.5" className="flow-line" style={{ animationDuration: '2s' }} />
         <text x="115" y="55" textAnchor="middle" fill="#60a5fa" fontSize="7" fontWeight="bold">Non-Potable Loop</text>
 
         {/* ===== COLD WATER INLET (enters preheat bottom-left) ===== */}
