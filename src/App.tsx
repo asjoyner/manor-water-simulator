@@ -19,7 +19,8 @@ const getTempColor = (t: number) => {
 const PlumbingDiagram = ({
   preheatLayers, rheem80Layers, flowRate, coldInTemp, preheatCapacity, rheem80Capacity,
   currentShuttleR, leftPortIsHot, tTanklessActual, setpoint, tankFlow, tanklessFlow, isTanklessLimited,
-  totalFlow, recircFlow, upstairsPumpOn, mainBsmtPumpOn, onToggleUpstairs, onToggleMainBsmt
+  totalFlow, recircFlow, upstairsPumpOn, mainBsmtPumpOn, onToggleUpstairs, onToggleMainBsmt,
+  faucetOn, onToggleFaucet
 }: any) => {
   const bronzeColor = '#b45309';
   const preheatOut = preheatLayers[0];
@@ -36,7 +37,7 @@ const PlumbingDiagram = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#f4f4f5' }}>System Visualization</h3>
       </div>
-      <svg viewBox="0 0 580 280" style={{ width: '100%', height: 'auto', display: 'block' }}>
+      <svg viewBox="0 0 600 280" style={{ width: '100%', height: 'auto', display: 'block' }}>
 
         {/* ===== NON-POTABLE HEATING LOOP (above & left of preheat tank) ===== */}
 
@@ -144,6 +145,17 @@ const PlumbingDiagram = ({
         {flowRate > 0 && <path d="M 500 160 L 575 160 L 575 240 L 562 240" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
         <text x="540" y="174" fill={mixedColor} fontSize="10" fontWeight="bold">{tMixed.toFixed(1)}°F</text>
 
+        {/* ===== OUTPUT FAUCET (branches up from tee at output corner) ===== */}
+        <circle cx="575" cy="160" r="3" fill="#52525b" />
+        <path d="M 575 157 L 575 100" fill="none" stroke={mixedColor} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 575 157 L 575 100" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <g onClick={onToggleFaucet} style={{ cursor: 'pointer' }}>
+          <circle cx="575" cy="90" r="10" fill={faucetOn ? '#1e3a5f' : '#27272a'} stroke={faucetOn ? '#3b82f6' : '#3f3f46'} strokeWidth="1.5" />
+          <text x="575" y="93" textAnchor="middle" fill={faucetOn ? '#93c5fd' : '#52525b'} fontSize="5" fontWeight="bold">{faucetOn ? 'ON' : 'OFF'}</text>
+          <text x="575" y="77" textAnchor="middle" fill={faucetOn ? '#a1a1aa' : '#52525b'} fontSize="7" fontWeight="bold">Faucet</text>
+        </g>
+        <text x="575" y="108" textAnchor="middle" fill={mixedColor} fontSize="7" fontWeight="bold">{flowRate.toFixed(1)} GPM</text>
+
         {/* ===== RECIRC PUMPS ===== */}
 
         {/* Tee from vertical to upstairs pump */}
@@ -212,6 +224,13 @@ function App() {
 
   // Simulation controls
   const [flowRate, setFlowRate] = useState(0.5);
+  const savedFlowRate = useRef(0.5);
+  if (flowRate > 0) savedFlowRate.current = flowRate;
+  const faucetOn = flowRate > 0;
+  const toggleFaucet = () => {
+    if (faucetOn) { setFlowRate(0); }
+    else { setFlowRate(savedFlowRate.current || 0.5); }
+  };
   const [simSpeed, setSimSpeed] = useState(1);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
@@ -347,6 +366,7 @@ function App() {
               totalFlow={totalFlow} recircFlow={RECIRC_FLOW_GPM}
               upstairsPumpOn={upstairsPumpOn} mainBsmtPumpOn={mainBsmtPumpOn}
               onToggleUpstairs={() => setUpstairsPumpOn(v => !v)} onToggleMainBsmt={() => setMainBsmtPumpOn(v => !v)}
+              faucetOn={faucetOn} onToggleFaucet={toggleFaucet}
             />
             <div style={{ background: '#18181b', padding: '2rem', borderRadius: '1rem', border: '1px solid #3f3f46' }}>
               <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '1.1rem' }}>Simulation Controls</h3>
