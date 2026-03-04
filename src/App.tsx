@@ -41,8 +41,8 @@ const PlumbingDiagram = ({
 
         {/* Heat pump — above preheat tank */}
         <rect x="60" y="10" width="110" height="35" rx="5" fill="#1e3a5f" stroke="#3b82f6" strokeWidth="1.5" />
-        <text x="115" y="25" textAnchor="middle" fill="#93c5fd" fontSize="7" fontWeight="bold">Air-Source</text>
-        <text x="115" y="36" textAnchor="middle" fill="#93c5fd" fontSize="6">Heat Pump</text>
+        <text x="115" y="25" textAnchor="middle" fill="#93c5fd" fontSize="7" fontWeight="bold">Ground-Source</text>
+        <text x="115" y="36" textAnchor="middle" fill="#93c5fd" fontSize="6">VRF Heat Pump</text>
 
         {/* Circulator pump — left of preheat, below heat pump */}
         <circle cx="40" cy="75" r="12" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
@@ -79,18 +79,23 @@ const PlumbingDiagram = ({
         <text x="130" y="123" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{preheatLayers[0].toFixed(0)}°F</text>
         <text x="130" y="195" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{preheatLayers[preheatLayers.length-1].toFixed(0)}°F</text>
 
-        {/* ===== PIPE: PREHEAT → RHEEM ===== */}
-        <path d="M 160 140 L 195 140 L 195 100 L 250 100 L 250 115" fill="none" stroke={getTempColor(preheatOut)} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 160 140 L 195 140 L 195 100 L 250 100 L 250 115" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
-        <text x="222" y="95" textAnchor="middle" fill={getTempColor(preheatOut)} fontSize="8" fontWeight="bold">{preheatOut.toFixed(0)}°F</text>
+        {/* ===== PIPE: PREHEAT → TEE ===== */}
+        <path d="M 160 140 L 185 140 L 185 200 L 205 200" fill="none" stroke={getTempColor(preheatOut)} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 160 140 L 185 140 L 185 200 L 205 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <text x="175" y="135" textAnchor="middle" fill={getTempColor(preheatOut)} fontSize="8" fontWeight="bold">{preheatOut.toFixed(0)}°F</text>
 
-        {/* ===== RHEEM PROPH80 ===== */}
+        {/* ===== INPUT TEE → RHEEM ===== */}
+        <circle cx="205" cy="200" r="4" fill="#52525b" />
+        <path d="M 205 200 L 220 200" fill="none" stroke={getTempColor(preheatOut)} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 205 200 L 220 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+
+        {/* ===== RHEEM HEAT PUMP WATER HEATER ===== */}
         <rect x="220" y="115" width="60" height="100" rx="5" fill="#27272a" stroke="#3f3f46" strokeWidth="2" />
         {rheem80Layers.map((temp: number, i: number) => (
           <rect key={`r${i}`} x="225" y={120 + (i * 9)} width="50" height="9" fill={getTempColor(temp)} opacity="0.9" />
         ))}
-        <text x="250" y="105" textAnchor="middle" fill="#eee" fontSize="9" fontWeight="bold">{rheem80Capacity}G Heat Pump</text>
-        <text x="250" y="230" textAnchor="middle" fill="#a1a1aa" fontSize="8">Water Heater</text>
+        <text x="220" y="228" textAnchor="start" fill="#eee" fontSize="8" fontWeight="bold">{rheem80Capacity}G Heat Pump</text>
+        <text x="220" y="238" textAnchor="start" fill="#a1a1aa" fontSize="8">Water Heater</text>
         <text x="250" y="133" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{rheem80Layers[0].toFixed(0)}°F</text>
         <text x="250" y="205" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{rheem80Layers[rheem80Layers.length-1].toFixed(0)}°F</text>
 
@@ -155,7 +160,7 @@ const PlumbingDiagram = ({
         <text x="545" y="286" textAnchor="start" fill="#71717a" fontSize="6">Pumps</text>
 
         {/* Return paths merge and go back to Rheem bottom */}
-        <path d="M 500 260 L 470 260 L 470 305 L 250 305 L 250 215" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        <path d="M 500 260 L 470 260 L 470 305 L 205 305 L 205 200" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
         <path d="M 500 292 L 470 292" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
         <text x="360" y="302" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirc Return</text>
       </svg>
