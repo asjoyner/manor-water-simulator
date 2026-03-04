@@ -276,13 +276,13 @@ function App() {
   let maxSystemGPM = totalSystemBTU / (500.4 * Math.max(1, setpoint - coldInTemp));
   if (tanklessSetpoint < setpoint) { maxSystemGPM = maxRheemBTU / (500.4 * Math.max(1, setpoint - coldInTemp)); }
 
-  // Optimal flow = combined tank recovery BTU/h / energy per gallon at setpoint
-  // Both preheat and Rheem contribute recovery BTU/h in series
-  const maxOptimalGPM = (preheatBTUh + rheemBTUh) / (500.4 * Math.max(1, setpoint - coldInTemp));
-
   // BTU calculations
   const preheatBTUh = preheatRecoveryRate * 8.34 * Math.max(0, preheatTargetTemp - coldInTemp);
   const rheemBTUh = rheemRecoveryRate * 8.34 * rheemDeltaT;
+
+  // Optimal flow = combined tank recovery BTU/h / energy per gallon at setpoint
+  // Both preheat and Rheem contribute recovery BTU/h in series
+  const maxOptimalGPM = (preheatBTUh + rheemBTUh) / (500.4 * Math.max(1, setpoint - coldInTemp));
   const tanklessBTUh = maxRinnaiBTU;
   const demandBTUh = flowRate * 500.4 * Math.max(0, tMixed - coldInTemp);
   const gallonsPerPreheatLayer = preheatCapacity / preheatLayers.length;
