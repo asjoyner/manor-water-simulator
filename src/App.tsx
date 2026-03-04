@@ -122,33 +122,29 @@ const PlumbingDiagram = ({
         <text x="390" y="242" textAnchor="middle" fill={isTanklessLimited ? "#ef4444" : "#eee"} fontSize="9" fontWeight="bold">Tankless Heater</text>
         <text x="390" y="203" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">{tTanklessActual.toFixed(1)}°F</text>
 
-        {/* ===== TANKLESS → VALVE LOWER PORT ===== */}
-        <path d="M 420 200 L 435 200 L 435 178 L 450 178" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="8" />
-        {tanklessFlow > 0.1 && <path d="M 420 200 L 435 200 L 435 178 L 450 178" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
-        <text x="442" y="198" textAnchor="end" fill={getTempColor(tTanklessActual)} fontSize="8" fontWeight="bold">{tTanklessActual.toFixed(0)}°F</text>
+        {/* ===== TANKLESS → VALVE LOWER PORT (straight line) ===== */}
+        <path d="M 420 200 L 450 200" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="8" />
+        {tanklessFlow > 0.1 && <path d="M 420 200 L 450 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
+        <text x="435" y="214" textAnchor="middle" fill={getTempColor(tTanklessActual)} fontSize="8" fontWeight="bold">{tTanklessActual.toFixed(0)}°F</text>
 
-        {/* ===== APOLLO MIXING VALVE (sideways: inputs left, output right) ===== */}
-        <rect x="450" y="130" width="50" height="65" rx="8" fill={bronzeColor} stroke="#92400e" strokeWidth="2" />
-        <circle cx="475" cy="166" r="15" fill="#92400e" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-        <text x="475" y="169" textAnchor="middle" fill="white" style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '1px' }}>MIXING</text>
-        <text x="463" y="145" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">{leftPortIsHot ? 'HOT' : 'COLD'}</text>
-        <text x="463" y="190" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">{leftPortIsHot ? 'COLD' : 'HOT'}</text>
-        <text x="475" y="207" textAnchor="middle" fill="#818cf8" fontSize="9" fontWeight="bold">SET: {setpoint}°F</text>
+        {/* ===== APOLLO MIXING VALVE (same height as tanks) ===== */}
+        <rect x="450" y="110" width="50" height="100" rx="8" fill={bronzeColor} stroke="#92400e" strokeWidth="2" />
+        <circle cx="475" cy="178" r="15" fill="#92400e" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+        <text x="475" y="181" textAnchor="middle" fill="white" style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '1px' }}>MIXING</text>
+        <text x="463" y="148" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">{leftPortIsHot ? 'HOT' : 'COLD'}</text>
+        <text x="463" y="207" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">{leftPortIsHot ? 'COLD' : 'HOT'}</text>
+        <text x="475" y="220" textAnchor="middle" fill="#818cf8" fontSize="9" fontWeight="bold">SET: {setpoint}°F</text>
 
-        {/* ===== VALVE OUTPUT → TEE (short right then down) ===== */}
-        <path d="M 500 166 L 515 166 L 515 210" fill="none" stroke={mixedColor} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 500 166 L 515 166 L 515 210" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
-        <text x="527" y="164" fill={mixedColor} fontSize="10" fontWeight="bold">{tMixed.toFixed(1)}°F</text>
-        <circle cx="515" cy="210" r="3" fill="#52525b" />
+        {/* ===== VALVE OUTPUT → RIGHT PAST PUMPS → DOWN ===== */}
+        <path d="M 500 178 L 575 178 L 575 240 L 562 240" fill="none" stroke={mixedColor} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 500 178 L 575 178 L 575 240 L 562 240" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <text x="540" y="192" fill={mixedColor} fontSize="10" fontWeight="bold">{tMixed.toFixed(1)}°F</text>
 
         {/* ===== RECIRC PUMPS ===== */}
 
-        {/* Supply: L-shape from tee down to midpoint, right to distribution */}
-        <path d="M 515 210 L 515 225 L 575 225" fill="none" stroke={mixedColor} strokeWidth="3" />
-        {totalFlow > 0 && <path d="M 515 210 L 515 225 L 575 225" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
-        {/* Right-side U connecting both pump inputs */}
-        <path d="M 562 210 L 575 210 L 575 240 L 562 240" fill="none" stroke={mixedColor} strokeWidth="3" />
-        {totalFlow > 0 && <path d="M 562 210 L 575 210 L 575 240 L 562 240" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        {/* Tee from vertical to upstairs pump */}
+        <path d="M 575 210 L 562 210" fill="none" stroke={mixedColor} strokeWidth="3" />
+        {totalFlow > 0 && <path d="M 575 210 L 562 210" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
 
         {/* Pump 1 (Upstairs) */}
         <circle cx="552" cy="210" r="10" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
@@ -168,7 +164,7 @@ const PlumbingDiagram = ({
         <path d="M 542 240 L 530 240 L 530 250" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
         {totalFlow > 0 && <path d="M 542 240 L 530 240 L 530 250" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
         <circle cx="530" cy="250" r="3" fill="#52525b" />
-        <text x="370" y="247" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirc Return</text>
+        <text x="250" y="263" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirc Return</text>
       </svg>
     </div>
   );
