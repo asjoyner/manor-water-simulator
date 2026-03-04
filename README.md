@@ -3,14 +3,13 @@
 **[Try the live simulator](https://asjoyner.github.io/manor-water-simulator/)**
 
 ## Overview
-Whole-house water system simulator modeling preheat tanks, recirculation loops, mixing valves, and tankless heaters. Extended from the [Apollo Mixing Valve Simulator](https://github.com/asjoyner/mixing-simulator).
+Whole-house water system simulator modeling the complete domestic hot water architecture. Extended from the [Apollo Mixing Valve Simulator](https://github.com/asjoyner/mixing-simulator).
 
-## Current State
-The simulator currently includes the core physics models from the mixing-simulator:
-- **Stratified Tank Model** — 10-layer vertical thermal stratification with advection, recovery, and convection
-- **Rinnai RX199iN Tankless Heater** — 199,000 BTU/h burner with BTU-limiting at high flow
-- **Apollo MVA Mixing Valve** — Thermostatic wax element with 8-second time constant
-- **Series-Hybrid Architecture** — Tank feeds tankless as booster, valve mixes output
+## System Architecture
+- **Cold Water Inlet** → **HTP GL119** (119-gallon indirect preheat tank)
+- **Preheat Loop** (non-potable, closed): **Mitsubishi-Trane TPWFYP036AU141A** heat pump → **Grundfos UP15-29SF** circulator → **Robin Wood 20-gallon buffer tank** → back to heat pump coil in GL119
+- **HTP GL119** output → **Rheem PROPH80 T2 RH400** (80-gallon hybrid, configured in Heat Pump mode)
+- Rheem output → fixtures
 
 ## Project Structure
 - **Source:** `src/` (React/TS code and physics models)
