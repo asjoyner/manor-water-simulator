@@ -110,6 +110,7 @@ const PlumbingDiagram = ({
         {/* ===== PATH: TEE → VALVE (direct, upper) ===== */}
         <path d="M 310 165 L 360 165 L 360 130" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="8" />
         {tankFlow > 0.1 && <path d="M 310 165 L 360 165 L 360 130" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tankFlow) }} />}
+        <text x="335" y="160" textAnchor="middle" fill={getTempColor(rheemOut)} fontSize="8" fontWeight="bold">{rheemOut.toFixed(0)}°F</text>
 
         {/* ===== PATH: TEE → TANKLESS (lower) ===== */}
         <path d="M 310 165 L 310 245 L 430 245 L 430 225" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" opacity="0.8" />
