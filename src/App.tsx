@@ -283,6 +283,17 @@ function App() {
 
   const maxOptimalGPM = (rheemRecoveryRate / 60) * rheemDeltaT / Math.max(1, setpoint - coldInTemp);
 
+  // BTU calculations
+  const preheatBTUh = preheatRecoveryRate * 8.34 * Math.max(0, preheatTargetTemp - coldInTemp);
+  const rheemBTUh = rheemRecoveryRate * 8.34 * rheemDeltaT;
+  const tanklessBTUh = maxRinnaiBTU;
+  const demandBTUh = flowRate * 500.4 * Math.max(0, tMixed - coldInTemp);
+  const gallonsPerPreheatLayer = preheatCapacity / preheatLayers.length;
+  const gallonsPerRheemLayer = rheem80Capacity / rheem80Layers.length;
+  const preheatStoredBTU = preheatLayers.reduce((sum: number, t: number) => sum + gallonsPerPreheatLayer * 8.34 * Math.max(0, t - coldInTemp), 0);
+  const rheemStoredBTU = rheem80Layers.reduce((sum: number, t: number) => sum + gallonsPerRheemLayer * 8.34 * Math.max(0, t - coldInTemp), 0);
+  const formatBTU = (v: number) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v.toFixed(0);
+
   const sliderStyle = { width: '100%', height: '6px', background: '#3f3f46', borderRadius: '5px', outline: 'none', margin: '15px 0' };
 
   return (
@@ -369,6 +380,37 @@ function App() {
                   <strong>SERIES BOOST:</strong> Active mixing.
                 </div>
               )}
+            </div>
+          </div>
+          <div style={{ background: '#18181b', padding: '1.5rem', borderRadius: '1rem', border: '1px solid #3f3f46', marginTop: '1.5rem' }}>
+            <h3 style={{ marginTop: 0, fontSize: '0.875rem', textTransform: 'uppercase', color: '#a1a1aa', marginBottom: '1rem' }}>Energy Balance (BTU)</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Preheat Recovery</span>
+                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#93c5fd' }}>{formatBTU(preheatBTUh)} BTU/h</span>
+              </div>
+              <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Rheem Recovery</span>
+                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#93c5fd' }}>{formatBTU(rheemBTUh)} BTU/h</span>
+              </div>
+              <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Tankless Max</span>
+                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#93c5fd' }}>{formatBTU(tanklessBTUh)} BTU/h</span>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Preheat Stored</span>
+                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#f59e0b' }}>{formatBTU(preheatStoredBTU)} BTU</span>
+              </div>
+              <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Rheem Stored</span>
+                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#f59e0b' }}>{formatBTU(rheemStoredBTU)} BTU</span>
+              </div>
+              <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Output Demand</span>
+                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: demandBTUh > preheatBTUh + rheemBTUh ? '#ef4444' : '#22c55e' }}>{formatBTU(demandBTUh)} BTU/h</span>
+              </div>
             </div>
           </div>
       </div>
