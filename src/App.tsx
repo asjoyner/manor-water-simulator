@@ -35,7 +35,7 @@ const PlumbingDiagram = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#f4f4f5' }}>System Visualization</h3>
       </div>
-      <svg viewBox="0 0 960 280" style={{ width: '100%', height: 'auto', display: 'block' }}>
+      <svg viewBox="0 0 960 300" style={{ width: '100%', height: 'auto', display: 'block' }}>
 
         {/* ===== NON-POTABLE HEATING LOOP (above & left of preheat tank) ===== */}
 
@@ -132,10 +132,36 @@ const PlumbingDiagram = ({
         <text x="790" y="120" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">{leftPortIsHot ? 'COLD' : 'HOT'}</text>
         <text x="825" y="100" textAnchor="start" fill="#818cf8" fontSize="10" fontWeight="bold">SET: {setpoint}°F</text>
 
-        {/* ===== MIXED OUTPUT ===== */}
-        <rect x="683" y="30" width="14" height="40" fill={mixedColor} rx="2" />
-        {flowRate > 0 && <line x1="690" y1="70" x2="690" y2="30" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
-        <text x="705" y="50" fill={mixedColor} fontSize="12" fontWeight="bold">{tMixed.toFixed(1)}°F OUT</text>
+        {/* ===== RECIRC LOOPS FROM VALVE OUTPUT ===== */}
+
+        {/* Valve output → right to recirc pump */}
+        <path d="M 690 70 L 690 45 L 840 45" fill="none" stroke={mixedColor} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 690 70 L 690 45 L 840 45" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <text x="720" y="38" fill={mixedColor} fontSize="10" fontWeight="bold">{tMixed.toFixed(1)}°F</text>
+
+        {/* Recirc pump (Grundfos UP15-29SF — drives both loops) */}
+        <circle cx="855" cy="45" r="12" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
+        <text x="855" y="48" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
+        <text x="855" y="68" textAnchor="middle" fill="#71717a" fontSize="6">Grundfos</text>
+        <text x="855" y="76" textAnchor="middle" fill="#71717a" fontSize="6">UP15-29SF</text>
+
+        {/* Pump → split to two loops */}
+        <path d="M 867 45 L 890 45" fill="none" stroke={mixedColor} strokeWidth="3" />
+        <circle cx="890" cy="45" r="3" fill="#52525b" />
+
+        {/* Upper loop: Upstairs */}
+        <path d="M 890 45 L 890 25 L 940 25" fill="none" stroke={mixedColor} strokeWidth="3" />
+        <text x="916" y="18" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Upstairs Loop</text>
+
+        {/* Lower loop: Main/Basement */}
+        <path d="M 890 45 L 890 65 L 940 65" fill="none" stroke={mixedColor} strokeWidth="3" />
+        <text x="916" y="80" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Main/Basement</text>
+        <text x="916" y="88" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Loop</text>
+
+        {/* Return paths merge and go back to Rheem bottom */}
+        <path d="M 940 25 L 950 25 L 950 290 L 460 290 L 460 215" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        <path d="M 940 65 L 950 65" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        <text x="700" y="286" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirc Return</text>
       </svg>
     </div>
   );
