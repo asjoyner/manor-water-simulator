@@ -409,7 +409,7 @@ function App() {
           </div>
       </div>
       <footer style={{ marginTop: '2rem', textAlign: 'center', padding: '1rem 0', borderTop: '1px solid #27272a' }}>
-        <a href="https://github.com/asjoyner/manor-water-simulator" target="_blank" rel="noopener noreferrer" style={{ color: '#71717a', fontSize: '0.8rem', textDecoration: 'none' }}>github.com/asjoyner/manor-water-simulator</a>
+        <a href="https://github.com/asjoyner/manor-water-simulator" target="_blank" rel="noopener noreferrer" style={{ color: '#a1a1aa', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 600 }}>github.com/asjoyner/manor-water-simulator</a>
       </footer>
     </div>
   );
