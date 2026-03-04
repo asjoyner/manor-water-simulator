@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { calculateStratifiedTankStep, calculateMinutesRemaining } from './models/ValveModel';
+import { calculateStratifiedTankStep, calculatePhysicalShuttleStep, calculateTanklessStep, calculateMinutesRemaining } from './models/ValveModel';
 
 const getTempColor = (t: number) => {
   if (t <= 60) return '#3b82f6';
@@ -17,12 +17,17 @@ const getTempColor = (t: number) => {
 };
 
 const PlumbingDiagram = ({
-  preheatLayers, rheem80Layers, flowRate, coldInTemp, preheatCapacity, rheem80Capacity
+  preheatLayers, rheem80Layers, flowRate, coldInTemp, preheatCapacity, rheem80Capacity,
+  currentShuttleR, leftPortIsHot, tTanklessActual, setpoint, tankFlow, tanklessFlow, isTanklessLimited
 }: any) => {
-  const avgPreheat = preheatLayers.reduce((a: number, b: number) => a + b, 0) / preheatLayers.length;
-  const avgRheem = rheem80Layers.reduce((a: number, b: number) => a + b, 0) / rheem80Layers.length;
+  const bronzeColor = '#b45309';
   const preheatOut = preheatLayers[0];
   const rheemOut = rheem80Layers[0];
+  const tH_Source = leftPortIsHot ? rheemOut : tTanklessActual;
+  const tC_Source = leftPortIsHot ? tTanklessActual : rheemOut;
+  const tMixed = currentShuttleR * tH_Source + (1 - currentShuttleR) * tC_Source;
+  const mixedColor = getTempColor(tMixed);
+  const animDur = (rate: number) => `${2/Math.max(rate,0.1)}s`;
 
   return (
     <div style={{ background: '#18181b', padding: '2rem', borderRadius: '1rem', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)', marginBottom: '2rem', border: '1px solid #3f3f46' }}>
@@ -30,124 +35,192 @@ const PlumbingDiagram = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#f4f4f5' }}>System Visualization</h3>
       </div>
-      <svg viewBox="0 0 700 320" style={{ width: '100%', height: 'auto', display: 'block' }}>
-        {/* Cold water inlet */}
+      <svg viewBox="0 0 960 320" style={{ width: '100%', height: 'auto', display: 'block' }}>
+
+        {/* ===== COLD WATER INLET ===== */}
         <path d="M 10 200 L 50 200 L 50 180" fill="none" stroke={getTempColor(coldInTemp)} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 10 200 L 50 200 L 50 180" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: `${2/Math.max(flowRate,0.1)}s` }} />}
+        {flowRate > 0 && <path d="M 10 200 L 50 200 L 50 180" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
         <text x="5" y="220" fill={getTempColor(coldInTemp)} fontSize="10" fontWeight="bold">COLD IN</text>
         <text x="5" y="232" fill={getTempColor(coldInTemp)} fontSize="10" fontWeight="bold">{coldInTemp}°F</text>
 
-        {/* HTP GL119 Preheat Tank */}
+        {/* ===== HTP GL119 PREHEAT TANK ===== */}
         <rect x="20" y="80" width="60" height="100" rx="5" fill="#27272a" stroke="#3f3f46" strokeWidth="2" />
         {preheatLayers.map((temp: number, i: number) => (
-          <rect key={i} x="25" y={85 + (i * 9)} width="50" height="9" fill={getTempColor(temp)} opacity="0.9" />
+          <rect key={`p${i}`} x="25" y={85 + (i * 9)} width="50" height="9" fill={getTempColor(temp)} opacity="0.9" />
         ))}
         <text x="50" y="70" textAnchor="middle" fill="#eee" fontSize="9" fontWeight="bold">HTP GL119</text>
         <text x="50" y="60" textAnchor="middle" fill="#a1a1aa" fontSize="8">({preheatCapacity}G Preheat)</text>
         <text x="50" y="98" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{preheatLayers[0].toFixed(0)}°F</text>
         <text x="50" y="170" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{preheatLayers[preheatLayers.length-1].toFixed(0)}°F</text>
 
-        {/* Non-potable heating loop (closed loop around the preheat tank) */}
-        {/* Loop path: heat pump → buffer tank → circulator → coil in GL119 → back */}
+        {/* ===== NON-POTABLE HEATING LOOP ===== */}
         <rect x="120" y="260" width="100" height="40" rx="5" fill="#1e3a5f" stroke="#3b82f6" strokeWidth="1.5" />
         <text x="170" y="276" textAnchor="middle" fill="#93c5fd" fontSize="7" fontWeight="bold">Mitsubishi-Trane</text>
         <text x="170" y="288" textAnchor="middle" fill="#93c5fd" fontSize="6">TPWFYP036AU141A</text>
-
-        {/* Buffer tank */}
         <rect x="250" y="265" width="40" height="30" rx="4" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
         <text x="270" y="283" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">20G Buf</text>
         <text x="270" y="257" textAnchor="middle" fill="#a1a1aa" fontSize="7">Robin Wood</text>
-
-        {/* Circulator pump */}
         <circle cx="320" cy="280" r="12" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
         <text x="320" y="283" textAnchor="middle" fill="#a1a1aa" fontSize="6" fontWeight="bold">PUMP</text>
         <text x="320" y="305" textAnchor="middle" fill="#71717a" fontSize="6">Grundfos</text>
         <text x="320" y="314" textAnchor="middle" fill="#71717a" fontSize="6">UP15-29SF</text>
-
-        {/* Non-potable loop piping */}
         <path d="M 220 280 L 250 280" fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 2" />
         <path d="M 290 280 L 308 280" fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 2" />
-        {/* Up from pump to tank coil */}
         <path d="M 332 280 L 360 280 L 360 140 L 80 140" fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 2" />
-        {/* Back from coil down to heat pump */}
         <path d="M 80 130 L 100 130 L 100 280 L 120 280" fill="none" stroke="#4b8cc4" strokeWidth="2" strokeDasharray="4 2" />
         <text x="200" y="250" fill="#60a5fa" fontSize="8" fontWeight="bold">Non-Potable Loop</text>
 
-        {/* Pipe: Preheat tank output → Rheem */}
-        <path d={`M 80 130 L 140 130 L 140 100 L 400 100 L 400 180`} fill="none" stroke={getTempColor(preheatOut)} strokeWidth="4" />
-        {flowRate > 0 && <path d={`M 80 130 L 140 130 L 140 100 L 400 100 L 400 180`} fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: `${2/Math.max(flowRate,0.1)}s` }} />}
-        <text x="270" y="95" textAnchor="middle" fill={getTempColor(preheatOut)} fontSize="9" fontWeight="bold">Pre-heated: {preheatOut.toFixed(0)}°F</text>
+        {/* ===== PIPE: PREHEAT → RHEEM ===== */}
+        <path d="M 80 120 L 130 120 L 130 80 L 370 80 L 370 100" fill="none" stroke={getTempColor(preheatOut)} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 80 120 L 130 120 L 130 80 L 370 80 L 370 100" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <text x="250" y="75" textAnchor="middle" fill={getTempColor(preheatOut)} fontSize="9" fontWeight="bold">Pre-heated: {preheatOut.toFixed(0)}°F</text>
 
-        {/* Rheem PROPH80 */}
-        <rect x="370" y="80" width="60" height="100" rx="5" fill="#27272a" stroke="#3f3f46" strokeWidth="2" />
+        {/* ===== RHEEM PROPH80 ===== */}
+        <rect x="340" y="100" width="60" height="100" rx="5" fill="#27272a" stroke="#3f3f46" strokeWidth="2" />
         {rheem80Layers.map((temp: number, i: number) => (
-          <rect key={i} x="375" y={85 + (i * 9)} width="50" height="9" fill={getTempColor(temp)} opacity="0.9" />
+          <rect key={`r${i}`} x="345" y={105 + (i * 9)} width="50" height="9" fill={getTempColor(temp)} opacity="0.9" />
         ))}
-        <text x="400" y="70" textAnchor="middle" fill="#eee" fontSize="9" fontWeight="bold">Rheem PROPH80</text>
-        <text x="400" y="60" textAnchor="middle" fill="#a1a1aa" fontSize="8">({rheem80Capacity}G Heat Pump)</text>
-        <text x="400" y="98" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{rheem80Layers[0].toFixed(0)}°F</text>
-        <text x="400" y="170" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{rheem80Layers[rheem80Layers.length-1].toFixed(0)}°F</text>
+        <text x="370" y="90" textAnchor="middle" fill="#eee" fontSize="9" fontWeight="bold">Rheem PROPH80</text>
+        <text x="370" y="215" textAnchor="middle" fill="#a1a1aa" fontSize="8">({rheem80Capacity}G Heat Pump)</text>
+        <text x="370" y="118" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{rheem80Layers[0].toFixed(0)}°F</text>
+        <text x="370" y="190" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{rheem80Layers[rheem80Layers.length-1].toFixed(0)}°F</text>
 
-        {/* Output pipe */}
-        <path d="M 430 130 L 500 130" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 430 130 L 500 130" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: `${2/Math.max(flowRate,0.1)}s` }} />}
-        <rect x="500" y="120" width="14" height="20" fill={getTempColor(rheemOut)} rx="2" />
-        <text x="520" y="135" fill={getTempColor(rheemOut)} fontSize="12" fontWeight="bold">{rheemOut.toFixed(1)}°F OUT</text>
+        {/* ===== TEE FROM RHEEM OUTPUT ===== */}
+        <circle cx="430" cy="150" r="4" fill="#52525b" />
 
-        {/* Avg temp labels */}
-        <text x="15" y="145" textAnchor="end" fill="#a1a1aa" fontSize="8">AVG</text>
-        <text x="15" y="155" textAnchor="end" fill="#a1a1aa" fontSize="8">{avgPreheat.toFixed(0)}°F</text>
-        <text x="365" y="145" textAnchor="end" fill="#a1a1aa" fontSize="8">AVG</text>
-        <text x="365" y="155" textAnchor="end" fill="#a1a1aa" fontSize="8">{avgRheem.toFixed(0)}°F</text>
+        {/* Rheem → tee */}
+        <path d="M 400 150 L 430 150" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 400 150 L 430 150" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+
+        {/* ===== PATH: TEE → VALVE (direct, upper) ===== */}
+        <path d="M 430 150 L 500 150 L 500 120" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="8" />
+        {tankFlow > 0.1 && <path d="M 430 150 L 500 150 L 500 120" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tankFlow) }} />}
+
+        {/* ===== PATH: TEE → TANKLESS (lower) ===== */}
+        <path d="M 430 150 L 430 230 L 610 230 L 610 200" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" opacity="0.8" />
+        {tanklessFlow > 0.1 && <path d="M 430 150 L 430 230 L 610 230 L 610 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
+        <text x="520" y="245" textAnchor="middle" fill="#a1a1aa" fontSize="8" fontWeight="bold">PRE-HEAT ({rheemOut.toFixed(0)}°F)</text>
+
+        {/* ===== RINNAI TANKLESS ===== */}
+        <rect x="580" y="140" width="60" height="60" rx="5" fill="#27272a" stroke={isTanklessLimited ? "#ef4444" : "#3f3f46"} strokeWidth="2" />
+        <path d="M 590 155 L 630 155 L 590 170 L 630 170 L 590 185 L 630 185" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="2" />
+        <text x="610" y="210" textAnchor="middle" fill={isTanklessLimited ? "#ef4444" : "#eee"} fontSize="9" fontWeight="bold">Rinnai RX199iN</text>
+        <text x="610" y="175" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">{tTanklessActual.toFixed(1)}°F</text>
+
+        {/* Tankless → valve */}
+        <path d="M 640 170 L 700 170 L 700 120" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="8" />
+        {tanklessFlow > 0.1 && <path d="M 640 170 L 700 170 L 700 120" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
+
+        {/* ===== APOLLO MIXING VALVE ===== */}
+        <rect x="470" y="60" width="260" height="60" rx="8" fill={bronzeColor} stroke="#92400e" strokeWidth="2" />
+        <circle cx="600" cy="90" r="22" fill="#92400e" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+        <text x="600" y="94" textAnchor="middle" fill="white" style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '1px' }}>APOLLO</text>
+        <text x="500" y="110" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">{leftPortIsHot ? 'HOT' : 'COLD'}</text>
+        <text x="700" y="110" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">{leftPortIsHot ? 'COLD' : 'HOT'}</text>
+        <text x="735" y="90" textAnchor="start" fill="#818cf8" fontSize="10" fontWeight="bold">SET: {setpoint}°F</text>
+
+        {/* ===== MIXED OUTPUT ===== */}
+        <rect x="593" y="20" width="14" height="40" fill={mixedColor} rx="2" />
+        {flowRate > 0 && <line x1="600" y1="60" x2="600" y2="20" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <text x="615" y="40" fill={mixedColor} fontSize="12" fontWeight="bold">{tMixed.toFixed(1)}°F OUT</text>
       </svg>
     </div>
   );
 };
 
 function App() {
+  // Preheat + Rheem state
   const [preheatTargetTemp, setPreheatTargetTemp] = useState(100);
   const [rheemTargetTemp, setRheemTargetTemp] = useState(135);
-  const [flowRate, setFlowRate] = useState(0.5);
   const [coldInTemp, setColdInTemp] = useState(60);
   const [preheatCapacity] = useState(119);
   const [rheem80Capacity] = useState(80);
   const [preheatRecoveryRate, setPreheatRecoveryRate] = useState(20);
   const [rheemRecoveryRate, setRheemRecoveryRate] = useState(25);
-  const [simSpeed, setSimSpeed] = useState(1);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [preheatLayers, setPreheatLayers] = useState(new Array(10).fill(100));
   const [rheem80Layers, setRheem80Layers] = useState(new Array(10).fill(135));
 
-  const stateRef = useRef({ preheatLayers, rheem80Layers });
-  stateRef.current = { preheatLayers, rheem80Layers };
+  // Tankless + mixing valve state (from original)
+  const [tanklessSetpoint, setTanklessSetpoint] = useState(140);
+  const [setpoint, setSetpoint] = useState(125);
+  const [leftPortIsHot, setLeftPortIsHot] = useState(false);
+  const [currentTanklessActual, setCurrentTanklessActual] = useState(140);
+  const [isTanklessLimited, setIsTanklessLimited] = useState(false);
+
+  const getInitialShuttle = () => {
+    let r = 0.5;
+    for (let i = 0; i < 120; i++) { r = calculatePhysicalShuttleStep(r, 140, 135, 125, 1); }
+    return r;
+  };
+  const [currentShuttleR, setCurrentShuttleR] = useState(getInitialShuttle());
+
+  // Simulation controls
+  const [flowRate, setFlowRate] = useState(0.5);
+  const [simSpeed, setSimSpeed] = useState(1);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  const stateRef = useRef({ preheatLayers, rheem80Layers, currentShuttleR, currentTanklessActual });
+  stateRef.current = { preheatLayers, rheem80Layers, currentShuttleR, currentTanklessActual };
 
   useEffect(() => {
     const tickRateMs = 100;
     const timer = setInterval(() => {
       const stepSeconds = (tickRateMs / 1000) * simSpeed;
       setElapsedSeconds(prev => prev + stepSeconds);
-      const { preheatLayers: pLayers, rheem80Layers: rLayers } = stateRef.current;
+      const { preheatLayers: pLayers, rheem80Layers: rLayers, currentShuttleR: r, currentTanklessActual: tL } = stateRef.current;
 
-      // Step 1: Cold water enters preheat tank, heated by heat pump loop
+      // Step 1: Preheat tank — cold water in, heated by heat pump loop
       const nextPreheat = calculateStratifiedTankStep(
         pLayers, preheatCapacity, flowRate, coldInTemp,
         preheatRecoveryRate, preheatTargetTemp, stepSeconds
       );
       setPreheatLayers(nextPreheat);
 
-      // Step 2: Preheat output feeds into Rheem 80G (heat pump mode)
+      // Step 2: Rheem 80G — preheat output in, heated by heat pump
       const preheatOutTemp = nextPreheat[0];
       const nextRheem = calculateStratifiedTankStep(
         rLayers, rheem80Capacity, flowRate, preheatOutTemp,
         rheemRecoveryRate, rheemTargetTemp, stepSeconds
       );
       setRheem80Layers(nextRheem);
+
+      // Step 3: Mixing valve — Rheem output on one port, tankless on other
+      const rheemOutTemp = nextRheem[0];
+      const tH = leftPortIsHot ? rheemOutTemp : tL;
+      const tC = leftPortIsHot ? tL : rheemOutTemp;
+      const nextShuttleR = calculatePhysicalShuttleStep(r, tH, tC, setpoint, stepSeconds);
+      setCurrentShuttleR(nextShuttleR);
+
+      // Step 4: Tankless — receives fraction of flow, pre-heated by Rheem output
+      const tanklessFlowVal = leftPortIsHot ? ((1 - nextShuttleR) * flowRate) : (nextShuttleR * flowRate);
+      const tanklessResult = calculateTanklessStep(tanklessSetpoint, tanklessFlowVal, rheemOutTemp);
+      setCurrentTanklessActual(tanklessResult.temp);
+      setIsTanklessLimited(tanklessResult.isBTULimited);
     }, tickRateMs);
     return () => clearInterval(timer);
-  }, [simSpeed, flowRate, preheatCapacity, rheem80Capacity, preheatRecoveryRate, rheemRecoveryRate, preheatTargetTemp, rheemTargetTemp, coldInTemp]);
+  }, [simSpeed, flowRate, preheatCapacity, rheem80Capacity, preheatRecoveryRate, rheemRecoveryRate,
+      preheatTargetTemp, rheemTargetTemp, coldInTemp, tanklessSetpoint, setpoint, leftPortIsHot]);
 
+  // Derived values
   const rheemOut = rheem80Layers[0];
-  const minutesRemaining = calculateMinutesRemaining(rheem80Layers, rheem80Capacity, flowRate, rheemRecoveryRate, rheemTargetTemp);
+  const tH_Source = leftPortIsHot ? rheemOut : currentTanklessActual;
+  const tC_Source = leftPortIsHot ? currentTanklessActual : rheemOut;
+  const tMixed = currentShuttleR * tH_Source + (1 - currentShuttleR) * tC_Source;
+
+  const tankFlow = leftPortIsHot ? (currentShuttleR * flowRate) : ((1 - currentShuttleR) * flowRate);
+  const tanklessFlow = leftPortIsHot ? ((1 - currentShuttleR) * flowRate) : (currentShuttleR * flowRate);
+  const tankOnPort = leftPortIsHot ? 'hot' : 'cold';
+
+  const minutesRemaining = calculateMinutesRemaining(rheem80Layers, rheem80Capacity, flowRate, rheemRecoveryRate, setpoint);
+
+  const maxRinnaiBTU = 199000 * 0.97;
+  const rheemDeltaT = Math.max(0, rheemTargetTemp - coldInTemp);
+  const maxRheemBTU = rheemRecoveryRate * 8.34 * rheemDeltaT;
+  const totalSystemBTU = maxRinnaiBTU + maxRheemBTU;
+  let maxSystemGPM = totalSystemBTU / (500.4 * Math.max(1, setpoint - coldInTemp));
+  if (tanklessSetpoint < setpoint) { maxSystemGPM = maxRheemBTU / (500.4 * Math.max(1, setpoint - coldInTemp)); }
+
+  const maxOptimalGPM = (rheemRecoveryRate / 60) * rheemDeltaT / Math.max(1, setpoint - coldInTemp);
 
   const sliderStyle = { width: '100%', height: '6px', background: '#3f3f46', borderRadius: '5px', outline: 'none', margin: '15px 0' };
 
@@ -161,7 +234,13 @@ function App() {
               <div style={{ flex: 1, background: '#18181b', padding: '1rem 1.5rem', borderRadius: '0.75rem', border: '1px solid #3f3f46', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><span style={{ fontSize: '0.875rem', color: '#a1a1aa', fontWeight: 600 }}>SIMULATION CLOCK</span><span style={{ fontFamily: 'monospace', fontSize: '1.5rem', color: '#6366f1', fontWeight: 'bold' }}>{elapsedSeconds.toFixed(0)}s</span></div>
               <div style={{ width: '200px', background: '#18181b', padding: '1rem 1.5rem', borderRadius: '0.75rem', border: '1px solid #3f3f46' }}><label style={{ display: 'block', fontSize: '0.75rem', color: '#a1a1aa', fontWeight: 600, marginBottom: '0.5rem' }}>SPEED: {simSpeed}x</label><input type="range" min="1" max="300" value={simSpeed} onChange={e => setSimSpeed(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} /></div>
             </div>
-            <PlumbingDiagram preheatLayers={preheatLayers} rheem80Layers={rheem80Layers} flowRate={flowRate} coldInTemp={coldInTemp} preheatCapacity={preheatCapacity} rheem80Capacity={rheem80Capacity} />
+            <PlumbingDiagram
+              preheatLayers={preheatLayers} rheem80Layers={rheem80Layers} flowRate={flowRate}
+              coldInTemp={coldInTemp} preheatCapacity={preheatCapacity} rheem80Capacity={rheem80Capacity}
+              currentShuttleR={currentShuttleR} leftPortIsHot={leftPortIsHot}
+              tTanklessActual={currentTanklessActual} setpoint={setpoint}
+              tankFlow={tankFlow} tanklessFlow={tanklessFlow} isTanklessLimited={isTanklessLimited}
+            />
             <div style={{ background: '#18181b', padding: '2rem', borderRadius: '1rem', border: '1px solid #3f3f46' }}>
               <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '1.1rem' }}>Simulation Controls</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
@@ -176,30 +255,58 @@ function App() {
                 <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Preheat Recovery: <span style={{ color: '#fafafa' }}>{preheatRecoveryRate} GPH</span></label><input type="range" min="5" max="60" value={preheatRecoveryRate} onChange={e => setPreheatRecoveryRate(parseInt(e.target.value))} style={sliderStyle} /></div>
                 <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Rheem Recovery: <span style={{ color: '#fafafa' }}>{rheemRecoveryRate} GPH</span></label><input type="range" min="5" max="60" value={rheemRecoveryRate} onChange={e => setRheemRecoveryRate(parseInt(e.target.value))} style={sliderStyle} /></div>
               </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Mixing Valve Setpoint: <span style={{ color: '#fafafa' }}>{setpoint}°F</span></label><input type="range" min="85" max="160" value={setpoint} onChange={e => setSetpoint(parseInt(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Tankless Output: <span style={{ color: '#fafafa' }}>{tanklessSetpoint}°F</span></label><input type="range" min="100" max="160" value={tanklessSetpoint} onChange={e => setTanklessSetpoint(parseInt(e.target.value))} style={sliderStyle} /></div>
+              </div>
+              <button onClick={() => setLeftPortIsHot(!leftPortIsHot)} style={{ width: '100%', marginTop: '2rem', padding: '0.75rem', background: '#27272a', color: 'white', border: '1px solid #3f3f46', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 600 }}>Swap Valve Inputs (Currently {leftPortIsHot ? 'Left is HOT' : 'Right is HOT'})</button>
             </div>
           </div>
           <div>
             <div style={{ background: '#18181b', padding: '2rem', borderRadius: '1rem', border: '1px solid #3f3f46', textAlign: 'center' }}>
-              <h3 style={{ marginTop: 0, fontSize: '0.875rem', textTransform: 'uppercase', color: '#a1a1aa' }}>Output Temperature</h3>
-              <div style={{ fontSize: '4.5rem', fontWeight: 800, color: getTempColor(rheemOut) }}>{rheemOut.toFixed(1)}°F</div>
+              <h3 style={{ marginTop: 0, fontSize: '0.875rem', textTransform: 'uppercase', color: '#a1a1aa' }}>Real-Time Output</h3>
+              <div style={{ fontSize: '4.5rem', fontWeight: 800, color: getTempColor(tMixed) }}>{tMixed.toFixed(1)}°F</div>
               <div style={{ borderTop: '1px solid #27272a', marginTop: '1.5rem', paddingTop: '1.5rem', textAlign: 'left' }}>
                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.875rem' }}><span style={{ color: '#a1a1aa' }}>Preheat Out</span><span style={{ fontWeight: 600 }}>{preheatLayers[0].toFixed(1)}°F</span></div>
-                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}><span style={{ color: '#a1a1aa' }}>Flow Rate</span><span style={{ fontWeight: 600 }}>{flowRate.toFixed(1)} GPM</span></div>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.875rem' }}><span style={{ color: '#a1a1aa' }}>Rheem Out</span><span style={{ fontWeight: 600 }}>{rheemOut.toFixed(1)}°F</span></div>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.875rem' }}><span style={{ color: '#a1a1aa' }}>Tank Flow</span><span style={{ fontWeight: 600 }}>{tankFlow.toFixed(1)} GPM</span></div>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}><span style={{ color: '#a1a1aa' }}>Tankless Flow</span><span style={{ fontWeight: 600 }}>{tanklessFlow.toFixed(1)} GPM</span></div>
               </div>
             </div>
             <div style={{ marginTop: '1.5rem', background: '#27272a', padding: '1.5rem', borderRadius: '1rem', fontSize: '0.875rem', lineHeight: 1.6 }}>
               <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#18181b', borderRadius: '0.5rem', border: '1px solid #3f3f46', textAlign: 'center' }}><span style={{ fontSize: '0.75rem', color: '#a1a1aa', display: 'block', marginBottom: '0.25rem' }}>ESTIMATED HOT WATER REMAINING</span><span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: minutesRemaining === Infinity ? '#22c55e' : minutesRemaining < 5 ? '#ef4444' : '#f97316' }}>{minutesRemaining === Infinity ? 'Infinite (Stable)' : `${minutesRemaining.toFixed(1)} Minutes`}</span></div>
-              {flowRate <= 0.05 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                <div style={{ background: '#18181b', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #3f3f46', textAlign: 'center' }}>
+                  <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>System Capacity</span>
+                  <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#f4f4f5' }}>{maxSystemGPM.toFixed(1)} GPM</span>
+                  <span style={{ fontSize: '0.6rem', color: '#71717a', display: 'block' }}>@ {setpoint}°F Output</span>
+                </div>
+                <div style={{ background: '#18181b', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #3f3f46', textAlign: 'center' }}>
+                  <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Optimal Flow</span>
+                  <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#86efac' }}>{maxOptimalGPM.toFixed(1)} GPM</span>
+                  <span style={{ fontSize: '0.6rem', color: '#71717a', display: 'block' }}>Sustainable Tank-Only</span>
+                </div>
+              </div>
+              {isTanklessLimited && <div style={{ marginBottom: '1rem', color: '#ef4444', fontWeight: 'bold', textAlign: 'center', border: '1px solid #ef4444', padding: '0.5rem', borderRadius: '0.5rem' }}>HEATER BTU LIMITED</div>}
+              {(tankFlow > (flowRate - 0.05) && tMixed >= setpoint - 0.5) ? (
+                <div style={{ marginTop: '1rem', color: '#86efac', border: '1px solid #22c55e', padding: '0.75rem', borderRadius: '0.5rem', background: 'rgba(34, 197, 94, 0.1)' }}>
+                  <strong>OPTIMAL STATE:</strong> Satisfied by tanks alone. Tankless remains dormant.
+                </div>
+              ) : ((currentShuttleR > 0.98 && tH_Source < setpoint - 0.5 && tankOnPort !== 'hot') || (currentShuttleR < 0.02 && tC_Source > setpoint + 0.5 && tankOnPort !== 'cold')) ? (
+                <div style={{ marginTop: '1rem', color: '#fca5a5', border: '1px solid #ef4444', padding: '0.75rem', borderRadius: '0.5rem', background: 'rgba(239, 68, 68, 0.1)' }}>
+                  <strong>LATCH ALERT:</strong> Valve is mechanically pinned to Tankless. It cannot "see" if the tanks have recovered.
+                </div>
+              ) : flowRate <= 0.05 ? (
                 <div style={{ marginTop: '1rem', color: '#a1a1aa', border: '1px solid #3f3f46', padding: '0.75rem', borderRadius: '0.5rem' }}>
                   <strong>SYSTEM IDLE:</strong> No active demand.
                 </div>
-              ) : rheemOut >= rheemTargetTemp - 1 ? (
-                <div style={{ marginTop: '1rem', color: '#86efac', border: '1px solid #22c55e', padding: '0.75rem', borderRadius: '0.5rem', background: 'rgba(34, 197, 94, 0.1)' }}>
-                  <strong>NORMAL:</strong> Delivering at target temperature.
+              ) : tanklessFlow > (flowRate - 0.05) ? (
+                <div style={{ marginTop: '1rem', color: '#93c5fd', border: '1px solid #3b82f6', padding: '0.75rem', borderRadius: '0.5rem', background: 'rgba(59, 130, 246, 0.1)' }}>
+                  <strong>SERIES BACKUP:</strong> Tanks depleted. Rinnai is providing primary heat.
                 </div>
               ) : (
-                <div style={{ marginTop: '1rem', color: '#fca5a5', border: '1px solid #ef4444', padding: '0.75rem', borderRadius: '0.5rem', background: 'rgba(239, 68, 68, 0.1)' }}>
-                  <strong>DEPLETING:</strong> Output below target. Recovery in progress.
+                <div style={{ marginTop: '1rem', color: '#fafafa', border: '1px solid #3f3f46', padding: '0.75rem', borderRadius: '0.5rem' }}>
+                  <strong>SERIES BOOST:</strong> Active mixing.
                 </div>
               )}
             </div>
