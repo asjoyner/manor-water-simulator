@@ -35,94 +35,107 @@ const PlumbingDiagram = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#f4f4f5' }}>System Visualization</h3>
       </div>
-      <svg viewBox="0 0 960 320" style={{ width: '100%', height: 'auto', display: 'block' }}>
+      <svg viewBox="0 0 960 280" style={{ width: '100%', height: 'auto', display: 'block' }}>
+
+        {/* ===== NON-POTABLE HEATING LOOP (above & left of preheat tank) ===== */}
+
+        {/* Heat pump — above preheat tank */}
+        <rect x="80" y="10" width="110" height="35" rx="5" fill="#1e3a5f" stroke="#3b82f6" strokeWidth="1.5" />
+        <text x="135" y="25" textAnchor="middle" fill="#93c5fd" fontSize="7" fontWeight="bold">Mitsubishi-Trane</text>
+        <text x="135" y="36" textAnchor="middle" fill="#93c5fd" fontSize="6">TPWFYP036AU141A</text>
+
+        {/* Circulator pump — left of preheat, below heat pump */}
+        <circle cx="60" cy="75" r="12" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
+        <text x="60" y="78" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
+        <text x="60" y="100" textAnchor="middle" fill="#71717a" fontSize="6">Grundfos</text>
+        <text x="60" y="109" textAnchor="middle" fill="#71717a" fontSize="6">UP15-29SF</text>
+
+        {/* Buffer tank — left of preheat tank */}
+        <rect x="45" y="120" width="30" height="50" rx="4" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
+        <text x="60" y="140" textAnchor="middle" fill="#a1a1aa" fontSize="6" fontWeight="bold">20G</text>
+        <text x="60" y="150" textAnchor="middle" fill="#a1a1aa" fontSize="6">Buffer</text>
+        <text x="60" y="180" textAnchor="middle" fill="#71717a" fontSize="6">Robin Wood</text>
+
+        {/* Non-potable loop piping (dashed blue = non-potable) */}
+        {/* Heat pump left output (hot) → down to pump */}
+        <path d="M 90 45 L 90 55 L 60 55 L 60 63" fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 2" />
+        {/* Pump → down to buffer tank */}
+        <path d="M 60 87 L 60 120" fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 2" />
+        {/* Buffer right side → right into preheat tank coil (left side, lower) */}
+        <path d="M 75 155 L 120 155" fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 2" />
+        {/* Coil return out of preheat tank (left side, upper) → left and up to heat pump */}
+        <path d="M 120 125 L 40 125 L 40 55 L 100 55 L 100 45" fill="none" stroke="#4b8cc4" strokeWidth="2" strokeDasharray="4 2" />
+        <text x="135" y="55" textAnchor="middle" fill="#60a5fa" fontSize="7" fontWeight="bold">Non-Potable Loop</text>
 
         {/* ===== COLD WATER INLET ===== */}
-        <path d="M 10 200 L 50 200 L 50 180" fill="none" stroke={getTempColor(coldInTemp)} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 10 200 L 50 200 L 50 180" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
-        <text x="5" y="220" fill={getTempColor(coldInTemp)} fontSize="10" fontWeight="bold">COLD IN</text>
-        <text x="5" y="232" fill={getTempColor(coldInTemp)} fontSize="10" fontWeight="bold">{coldInTemp}°F</text>
+        <path d="M 100 230 L 150 230 L 150 205" fill="none" stroke={getTempColor(coldInTemp)} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 100 230 L 150 230 L 150 205" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <text x="95" y="245" fill={getTempColor(coldInTemp)} fontSize="10" fontWeight="bold">COLD IN</text>
+        <text x="95" y="257" fill={getTempColor(coldInTemp)} fontSize="10" fontWeight="bold">{coldInTemp}°F</text>
 
         {/* ===== HTP GL119 PREHEAT TANK ===== */}
-        <rect x="20" y="80" width="60" height="100" rx="5" fill="#27272a" stroke="#3f3f46" strokeWidth="2" />
+        <rect x="120" y="105" width="60" height="100" rx="5" fill="#27272a" stroke="#3f3f46" strokeWidth="2" />
         {preheatLayers.map((temp: number, i: number) => (
-          <rect key={`p${i}`} x="25" y={85 + (i * 9)} width="50" height="9" fill={getTempColor(temp)} opacity="0.9" />
+          <rect key={`p${i}`} x="125" y={110 + (i * 9)} width="50" height="9" fill={getTempColor(temp)} opacity="0.9" />
         ))}
-        <text x="50" y="70" textAnchor="middle" fill="#eee" fontSize="9" fontWeight="bold">HTP GL119</text>
-        <text x="50" y="60" textAnchor="middle" fill="#a1a1aa" fontSize="8">({preheatCapacity}G Preheat)</text>
-        <text x="50" y="98" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{preheatLayers[0].toFixed(0)}°F</text>
-        <text x="50" y="170" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{preheatLayers[preheatLayers.length-1].toFixed(0)}°F</text>
-
-        {/* ===== NON-POTABLE HEATING LOOP ===== */}
-        <rect x="120" y="260" width="100" height="40" rx="5" fill="#1e3a5f" stroke="#3b82f6" strokeWidth="1.5" />
-        <text x="170" y="276" textAnchor="middle" fill="#93c5fd" fontSize="7" fontWeight="bold">Mitsubishi-Trane</text>
-        <text x="170" y="288" textAnchor="middle" fill="#93c5fd" fontSize="6">TPWFYP036AU141A</text>
-        <rect x="250" y="265" width="40" height="30" rx="4" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
-        <text x="270" y="283" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">20G Buf</text>
-        <text x="270" y="257" textAnchor="middle" fill="#a1a1aa" fontSize="7">Robin Wood</text>
-        <circle cx="320" cy="280" r="12" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
-        <text x="320" y="283" textAnchor="middle" fill="#a1a1aa" fontSize="6" fontWeight="bold">PUMP</text>
-        <text x="320" y="305" textAnchor="middle" fill="#71717a" fontSize="6">Grundfos</text>
-        <text x="320" y="314" textAnchor="middle" fill="#71717a" fontSize="6">UP15-29SF</text>
-        <path d="M 220 280 L 250 280" fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 2" />
-        <path d="M 290 280 L 308 280" fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 2" />
-        <path d="M 332 280 L 360 280 L 360 140 L 80 140" fill="none" stroke="#60a5fa" strokeWidth="2" strokeDasharray="4 2" />
-        <path d="M 80 130 L 100 130 L 100 280 L 120 280" fill="none" stroke="#4b8cc4" strokeWidth="2" strokeDasharray="4 2" />
-        <text x="200" y="250" fill="#60a5fa" fontSize="8" fontWeight="bold">Non-Potable Loop</text>
+        <text x="150" y="95" textAnchor="middle" fill="#eee" fontSize="9" fontWeight="bold">HTP GL119</text>
+        <text x="150" y="85" textAnchor="middle" fill="#a1a1aa" fontSize="8">({preheatCapacity}G Preheat)</text>
+        <text x="150" y="123" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{preheatLayers[0].toFixed(0)}°F</text>
+        <text x="150" y="195" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{preheatLayers[preheatLayers.length-1].toFixed(0)}°F</text>
 
         {/* ===== PIPE: PREHEAT → RHEEM ===== */}
-        <path d="M 80 120 L 130 120 L 130 80 L 370 80 L 370 100" fill="none" stroke={getTempColor(preheatOut)} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 80 120 L 130 120 L 130 80 L 370 80 L 370 100" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
-        <text x="250" y="75" textAnchor="middle" fill={getTempColor(preheatOut)} fontSize="9" fontWeight="bold">Pre-heated: {preheatOut.toFixed(0)}°F</text>
+        <path d="M 180 140 L 230 140 L 230 100 L 460 100 L 460 115" fill="none" stroke={getTempColor(preheatOut)} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 180 140 L 230 140 L 230 100 L 460 100 L 460 115" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <text x="345" y="95" textAnchor="middle" fill={getTempColor(preheatOut)} fontSize="9" fontWeight="bold">Pre-heated: {preheatOut.toFixed(0)}°F</text>
 
         {/* ===== RHEEM PROPH80 ===== */}
-        <rect x="340" y="100" width="60" height="100" rx="5" fill="#27272a" stroke="#3f3f46" strokeWidth="2" />
+        <rect x="430" y="115" width="60" height="100" rx="5" fill="#27272a" stroke="#3f3f46" strokeWidth="2" />
         {rheem80Layers.map((temp: number, i: number) => (
-          <rect key={`r${i}`} x="345" y={105 + (i * 9)} width="50" height="9" fill={getTempColor(temp)} opacity="0.9" />
+          <rect key={`r${i}`} x="435" y={120 + (i * 9)} width="50" height="9" fill={getTempColor(temp)} opacity="0.9" />
         ))}
-        <text x="370" y="90" textAnchor="middle" fill="#eee" fontSize="9" fontWeight="bold">Rheem PROPH80</text>
-        <text x="370" y="215" textAnchor="middle" fill="#a1a1aa" fontSize="8">({rheem80Capacity}G Heat Pump)</text>
-        <text x="370" y="118" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{rheem80Layers[0].toFixed(0)}°F</text>
-        <text x="370" y="190" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{rheem80Layers[rheem80Layers.length-1].toFixed(0)}°F</text>
+        <text x="460" y="105" textAnchor="middle" fill="#eee" fontSize="9" fontWeight="bold">Rheem PROPH80</text>
+        <text x="460" y="230" textAnchor="middle" fill="#a1a1aa" fontSize="8">({rheem80Capacity}G Heat Pump)</text>
+        <text x="460" y="133" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{rheem80Layers[0].toFixed(0)}°F</text>
+        <text x="460" y="205" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{rheem80Layers[rheem80Layers.length-1].toFixed(0)}°F</text>
 
         {/* ===== TEE FROM RHEEM OUTPUT ===== */}
-        <circle cx="430" cy="150" r="4" fill="#52525b" />
+        <circle cx="520" cy="165" r="4" fill="#52525b" />
 
         {/* Rheem → tee */}
-        <path d="M 400 150 L 430 150" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 400 150 L 430 150" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <path d="M 490 165 L 520 165" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 490 165 L 520 165" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
 
         {/* ===== PATH: TEE → VALVE (direct, upper) ===== */}
-        <path d="M 430 150 L 500 150 L 500 120" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="8" />
-        {tankFlow > 0.1 && <path d="M 430 150 L 500 150 L 500 120" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tankFlow) }} />}
+        <path d="M 520 165 L 590 165 L 590 130" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="8" />
+        {tankFlow > 0.1 && <path d="M 520 165 L 590 165 L 590 130" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tankFlow) }} />}
 
         {/* ===== PATH: TEE → TANKLESS (lower) ===== */}
-        <path d="M 430 150 L 430 230 L 610 230 L 610 200" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" opacity="0.8" />
-        {tanklessFlow > 0.1 && <path d="M 430 150 L 430 230 L 610 230 L 610 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
-        <text x="520" y="245" textAnchor="middle" fill="#a1a1aa" fontSize="8" fontWeight="bold">PRE-HEAT ({rheemOut.toFixed(0)}°F)</text>
+        <path d="M 520 165 L 520 245 L 700 245 L 700 210" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" opacity="0.8" />
+        {tanklessFlow > 0.1 && <path d="M 520 165 L 520 245 L 700 245 L 700 210" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
+        <text x="610" y="260" textAnchor="middle" fill="#a1a1aa" fontSize="8" fontWeight="bold">PRE-HEAT ({rheemOut.toFixed(0)}°F)</text>
 
         {/* ===== RINNAI TANKLESS ===== */}
-        <rect x="580" y="140" width="60" height="60" rx="5" fill="#27272a" stroke={isTanklessLimited ? "#ef4444" : "#3f3f46"} strokeWidth="2" />
-        <path d="M 590 155 L 630 155 L 590 170 L 630 170 L 590 185 L 630 185" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="2" />
-        <text x="610" y="210" textAnchor="middle" fill={isTanklessLimited ? "#ef4444" : "#eee"} fontSize="9" fontWeight="bold">Rinnai RX199iN</text>
-        <text x="610" y="175" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">{tTanklessActual.toFixed(1)}°F</text>
+        <rect x="670" y="150" width="60" height="60" rx="5" fill="#27272a" stroke={isTanklessLimited ? "#ef4444" : "#3f3f46"} strokeWidth="2" />
+        <path d="M 680 165 L 720 165 L 680 180 L 720 180 L 680 195 L 720 195" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="2" />
+        <text x="700" y="225" textAnchor="middle" fill={isTanklessLimited ? "#ef4444" : "#eee"} fontSize="9" fontWeight="bold">Rinnai RX199iN</text>
+        <text x="700" y="185" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">{tTanklessActual.toFixed(1)}°F</text>
 
         {/* Tankless → valve */}
-        <path d="M 640 170 L 700 170 L 700 120" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="8" />
-        {tanklessFlow > 0.1 && <path d="M 640 170 L 700 170 L 700 120" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
+        <path d="M 730 180 L 790 180 L 790 130" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="8" />
+        {tanklessFlow > 0.1 && <path d="M 730 180 L 790 180 L 790 130" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
 
         {/* ===== APOLLO MIXING VALVE ===== */}
-        <rect x="470" y="60" width="260" height="60" rx="8" fill={bronzeColor} stroke="#92400e" strokeWidth="2" />
-        <circle cx="600" cy="90" r="22" fill="#92400e" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
-        <text x="600" y="94" textAnchor="middle" fill="white" style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '1px' }}>APOLLO</text>
-        <text x="500" y="110" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">{leftPortIsHot ? 'HOT' : 'COLD'}</text>
-        <text x="700" y="110" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">{leftPortIsHot ? 'COLD' : 'HOT'}</text>
-        <text x="735" y="90" textAnchor="start" fill="#818cf8" fontSize="10" fontWeight="bold">SET: {setpoint}°F</text>
+        <rect x="560" y="70" width="260" height="60" rx="8" fill={bronzeColor} stroke="#92400e" strokeWidth="2" />
+        <circle cx="690" cy="100" r="22" fill="#92400e" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+        <text x="690" y="104" textAnchor="middle" fill="white" style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '1px' }}>APOLLO</text>
+        <text x="590" y="120" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">{leftPortIsHot ? 'HOT' : 'COLD'}</text>
+        <text x="790" y="120" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">{leftPortIsHot ? 'COLD' : 'HOT'}</text>
+        <text x="825" y="100" textAnchor="start" fill="#818cf8" fontSize="10" fontWeight="bold">SET: {setpoint}°F</text>
 
         {/* ===== MIXED OUTPUT ===== */}
-        <rect x="593" y="20" width="14" height="40" fill={mixedColor} rx="2" />
-        {flowRate > 0 && <line x1="600" y1="60" x2="600" y2="20" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
-        <text x="615" y="40" fill={mixedColor} fontSize="12" fontWeight="bold">{tMixed.toFixed(1)}°F OUT</text>
+        <rect x="683" y="30" width="14" height="40" fill={mixedColor} rx="2" />
+        {flowRate > 0 && <line x1="690" y1="70" x2="690" y2="30" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <text x="705" y="50" fill={mixedColor} fontSize="12" fontWeight="bold">{tMixed.toFixed(1)}°F OUT</text>
       </svg>
     </div>
   );
