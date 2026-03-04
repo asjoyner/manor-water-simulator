@@ -35,7 +35,7 @@ const PlumbingDiagram = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: '#f4f4f5' }}>System Visualization</h3>
       </div>
-      <svg viewBox="0 0 640 300" style={{ width: '100%', height: 'auto', display: 'block' }}>
+      <svg viewBox="0 0 540 340" style={{ width: '100%', height: 'auto', display: 'block' }}>
 
         {/* ===== NON-POTABLE HEATING LOOP (above & left of preheat tank) ===== */}
 
@@ -126,41 +126,39 @@ const PlumbingDiagram = ({
         <text x="430" y="106" textAnchor="middle" fill="white" style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '1px' }}>APOLLO</text>
         <text x="360" y="120" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">{leftPortIsHot ? 'HOT' : 'COLD'}</text>
         <text x="500" y="120" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">{leftPortIsHot ? 'COLD' : 'HOT'}</text>
-        <text x="535" y="102" textAnchor="start" fill="#818cf8" fontSize="9" fontWeight="bold">SET: {setpoint}°F</text>
+        <text x="500" y="142" textAnchor="middle" fill="#818cf8" fontSize="9" fontWeight="bold">SET: {setpoint}°F</text>
 
-        {/* ===== RECIRC LOOPS FROM VALVE OUTPUT ===== */}
+        {/* ===== VALVE OUTPUT → RECIRC ===== */}
 
-        {/* Valve output → up and right */}
-        <path d="M 430 75 L 430 45 L 520 45" fill="none" stroke={mixedColor} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 430 75 L 430 45 L 520 45" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
-        <text x="450" y="40" fill={mixedColor} fontSize="10" fontWeight="bold">{tMixed.toFixed(1)}°F</text>
+        {/* Valve output up, then right, then down the right edge */}
+        <path d="M 430 75 L 430 60 L 525 60 L 525 272" fill="none" stroke={mixedColor} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 430 75 L 430 60 L 525 60 L 525 272" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <text x="450" y="55" fill={mixedColor} fontSize="10" fontWeight="bold">{tMixed.toFixed(1)}°F</text>
 
-        {/* Split to two loops */}
-        <circle cx="520" cy="45" r="3" fill="#52525b" />
+        {/* Tee to two recirc pumps */}
+        <circle cx="525" cy="272" r="3" fill="#52525b" />
 
         {/* Pump 1 → Upstairs Loop */}
-        <path d="M 520 45 L 520 20 L 540 20" fill="none" stroke={mixedColor} strokeWidth="3" />
-        <circle cx="552" cy="20" r="10" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
-        <text x="552" y="23" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
-        <text x="552" y="6" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Upstairs Loop</text>
-        <path d="M 564 20 L 590 20" fill="none" stroke={mixedColor} strokeWidth="3" />
+        <path d="M 525 272 L 525 260 L 518 260" fill="none" stroke={mixedColor} strokeWidth="3" />
+        <circle cx="505" cy="260" r="10" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
+        <text x="505" y="263" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
+        <text x="505" y="246" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Upstairs Loop</text>
 
         {/* Pump 2 → Main/Basement Loop */}
-        <path d="M 520 45 L 520 65 L 540 65" fill="none" stroke={mixedColor} strokeWidth="3" />
-        <circle cx="552" cy="65" r="10" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
-        <text x="552" y="68" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
-        <text x="552" y="84" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Main/Basement</text>
-        <text x="552" y="92" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Loop</text>
-        <path d="M 564 65 L 590 65" fill="none" stroke={mixedColor} strokeWidth="3" />
+        <path d="M 525 272 L 525 292 L 518 292" fill="none" stroke={mixedColor} strokeWidth="3" />
+        <circle cx="505" cy="292" r="10" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
+        <text x="505" y="295" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
+        <text x="505" y="312" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Main/Basement</text>
+        <text x="505" y="320" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Loop</text>
 
-        {/* Grundfos label (shared model) */}
-        <text x="590" y="42" textAnchor="start" fill="#71717a" fontSize="6">Grundfos</text>
-        <text x="590" y="50" textAnchor="start" fill="#71717a" fontSize="6">UP15-29SF</text>
+        {/* Grundfos label */}
+        <text x="525" y="278" textAnchor="start" fill="#71717a" fontSize="6">Grundfos</text>
+        <text x="525" y="286" textAnchor="start" fill="#71717a" fontSize="6">UP15-29SF</text>
 
         {/* Return paths merge and go back to Rheem bottom */}
-        <path d="M 590 20 L 605 20 L 605 290 L 250 290 L 250 215" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
-        <path d="M 590 65 L 605 65" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
-        <text x="420" y="287" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirc Return</text>
+        <path d="M 493 260 L 460 260 L 460 330 L 250 330 L 250 215" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        <path d="M 493 292 L 460 292" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        <text x="355" y="327" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirc Return</text>
       </svg>
     </div>
   );
@@ -266,8 +264,7 @@ function App() {
     <div style={{ background: '#09090b', minHeight: '100vh', width: '100%' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '3rem 2rem', color: '#fafafa', fontFamily: 'Inter, system-ui, sans-serif' }}>
         <header style={{ marginBottom: '3rem' }}><h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>Manor Water Simulator</h1><p style={{ color: '#a1a1aa' }}>Whole-House Thermal Modeling</p></header>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '3rem' }}>
-          <div>
+        <div>
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
               <div style={{ flex: 1, background: '#18181b', padding: '1rem 1.5rem', borderRadius: '0.75rem', border: '1px solid #3f3f46', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><span style={{ fontSize: '0.875rem', color: '#a1a1aa', fontWeight: 600 }}>SIMULATION CLOCK</span><span style={{ fontFamily: 'monospace', fontSize: '1.5rem', color: '#6366f1', fontWeight: 'bold' }}>{elapsedSeconds.toFixed(0)}s</span></div>
               <div style={{ width: '200px', background: '#18181b', padding: '1rem 1.5rem', borderRadius: '0.75rem', border: '1px solid #3f3f46' }}><label style={{ display: 'block', fontSize: '0.75rem', color: '#a1a1aa', fontWeight: 600, marginBottom: '0.5rem' }}>SPEED: {simSpeed}x</label><input type="range" min="1" max="300" value={simSpeed} onChange={e => setSimSpeed(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} /></div>
@@ -297,10 +294,9 @@ function App() {
                 <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Mixing Valve Setpoint: <span style={{ color: '#fafafa' }}>{setpoint}°F</span></label><input type="range" min="85" max="160" value={setpoint} onChange={e => setSetpoint(parseInt(e.target.value))} style={sliderStyle} /></div>
                 <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Tankless Output: <span style={{ color: '#fafafa' }}>{tanklessSetpoint}°F</span></label><input type="range" min="100" max="160" value={tanklessSetpoint} onChange={e => setTanklessSetpoint(parseInt(e.target.value))} style={sliderStyle} /></div>
               </div>
-              <button onClick={() => setLeftPortIsHot(!leftPortIsHot)} style={{ width: '100%', marginTop: '2rem', padding: '0.75rem', background: '#27272a', color: 'white', border: '1px solid #3f3f46', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 600 }}>Swap Valve Inputs (Currently {leftPortIsHot ? 'Left is HOT' : 'Right is HOT'})</button>
             </div>
           </div>
-          <div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
             <div style={{ background: '#18181b', padding: '2rem', borderRadius: '1rem', border: '1px solid #3f3f46', textAlign: 'center' }}>
               <h3 style={{ marginTop: 0, fontSize: '0.875rem', textTransform: 'uppercase', color: '#a1a1aa' }}>Real-Time Output</h3>
               <div style={{ fontSize: '4.5rem', fontWeight: 800, color: getTempColor(tMixed) }}>{tMixed.toFixed(1)}°F</div>
@@ -311,7 +307,7 @@ function App() {
                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}><span style={{ color: '#a1a1aa' }}>Tankless Flow</span><span style={{ fontWeight: 600 }}>{tanklessFlow.toFixed(1)} GPM</span></div>
               </div>
             </div>
-            <div style={{ marginTop: '1.5rem', background: '#27272a', padding: '1.5rem', borderRadius: '1rem', fontSize: '0.875rem', lineHeight: 1.6 }}>
+            <div style={{ background: '#27272a', padding: '1.5rem', borderRadius: '1rem', fontSize: '0.875rem', lineHeight: 1.6 }}>
               <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#18181b', borderRadius: '0.5rem', border: '1px solid #3f3f46', textAlign: 'center' }}><span style={{ fontSize: '0.75rem', color: '#a1a1aa', display: 'block', marginBottom: '0.25rem' }}>ESTIMATED HOT WATER REMAINING</span><span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: minutesRemaining === Infinity ? '#22c55e' : minutesRemaining < 5 ? '#ef4444' : '#f97316' }}>{minutesRemaining === Infinity ? 'Infinite (Stable)' : `${minutesRemaining.toFixed(1)} Minutes`}</span></div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
                 <div style={{ background: '#18181b', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #3f3f46', textAlign: 'center' }}>
@@ -349,7 +345,6 @@ function App() {
               )}
             </div>
           </div>
-        </div>
       </div>
     </div>
   );
