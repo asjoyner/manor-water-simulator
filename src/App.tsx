@@ -286,6 +286,9 @@ function App() {
   const gallonsPerRheemLayer = rheem80Capacity / rheem80Layers.length;
   const preheatStoredBTU = preheatLayers.reduce((sum: number, t: number) => sum + gallonsPerPreheatLayer * 8.34 * Math.max(0, t - coldInTemp), 0);
   const rheemStoredBTU = rheem80Layers.reduce((sum: number, t: number) => sum + gallonsPerRheemLayer * 8.34 * Math.max(0, t - coldInTemp), 0);
+  const tankedBTUh = preheatBTUh + rheemBTUh;
+  const totalStoredBTU = preheatStoredBTU + rheemStoredBTU;
+  const storedTimeH = demandBTUh > 0 ? totalStoredBTU / demandBTUh : Infinity;
   const formatBTU = (v: number) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v.toFixed(0);
 
   const sliderStyle = { width: '100%', height: '6px', background: '#3f3f46', borderRadius: '5px', outline: 'none', margin: '15px 0' };
@@ -392,7 +395,7 @@ function App() {
                 <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#93c5fd' }}>{formatBTU(tanklessBTUh)} BTU/h</span>
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
               <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
                 <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Preheat Stored</span>
                 <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#f59e0b' }}>{formatBTU(preheatStoredBTU)} BTU</span>
@@ -402,8 +405,19 @@ function App() {
                 <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#f59e0b' }}>{formatBTU(rheemStoredBTU)} BTU</span>
               </div>
               <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Total Stored</span>
+                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#f59e0b' }}>{formatBTU(totalStoredBTU)} BTU</span>
+                <span style={{ fontSize: '0.7rem', color: '#a1a1aa', display: 'block' }}>{storedTimeH === Infinity ? 'No demand' : storedTimeH >= 1 ? `${storedTimeH.toFixed(1)}h at current demand` : `${(storedTimeH * 60).toFixed(0)}m at current demand`}</span>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Tank Recovery Total</span>
+                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: tankedBTUh >= demandBTUh ? '#22c55e' : '#f59e0b' }}>{formatBTU(tankedBTUh)} BTU/h</span>
+              </div>
+              <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
                 <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Output Demand</span>
-                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: demandBTUh > preheatBTUh + rheemBTUh ? '#ef4444' : '#22c55e' }}>{formatBTU(demandBTUh)} BTU/h</span>
+                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: demandBTUh > tankedBTUh ? '#ef4444' : '#22c55e' }}>{formatBTU(demandBTUh)} BTU/h</span>
               </div>
             </div>
           </div>
