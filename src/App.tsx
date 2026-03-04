@@ -143,35 +143,31 @@ const PlumbingDiagram = ({
 
         {/* ===== RECIRC PUMPS ===== */}
 
-        {/* Supply line: from tee, over top, down right side to loops */}
-        <path d="M 515 210 L 515 198 L 575 198 L 575 240" fill="none" stroke={mixedColor} strokeWidth="3" />
-        {totalFlow > 0 && <path d="M 515 210 L 515 198 L 575 198 L 575 240" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        {/* Supply: L-shape from tee down to midpoint, right to distribution */}
+        <path d="M 515 210 L 515 225 L 575 225" fill="none" stroke={mixedColor} strokeWidth="3" />
+        {totalFlow > 0 && <path d="M 515 210 L 515 225 L 575 225" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        {/* Right-side U connecting both pump inputs */}
+        <path d="M 562 210 L 575 210 L 575 240 L 562 240" fill="none" stroke={mixedColor} strokeWidth="3" />
+        {totalFlow > 0 && <path d="M 562 210 L 575 210 L 575 240 L 562 240" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
 
-        {/* Pump 1 (Upstairs) — loop return enters from right */}
-        <path d="M 575 210 L 562 210" fill="none" stroke={mixedColor} strokeWidth="3" />
-        {totalFlow > 0 && <path d="M 575 210 L 562 210" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        {/* Pump 1 (Upstairs) */}
         <circle cx="552" cy="210" r="10" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
         <text x="552" y="213" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
         <text x="552" y="197" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Upstairs</text>
 
-        {/* Pump 2 (Main/Basement) — loop return enters from right */}
-        <path d="M 575 240 L 562 240" fill="none" stroke={mixedColor} strokeWidth="3" />
-        {totalFlow > 0 && <path d="M 575 240 L 562 240" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        {/* Pump 2 (Main/Basement) */}
         <circle cx="552" cy="240" r="10" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
         <text x="552" y="243" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
         <text x="552" y="258" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Main/Bsmt</text>
 
         {/* ===== RECIRC RETURN ===== */}
-        {/* Pump 1 (upstairs) output exits left, drops to trunk */}
-        <path d="M 542 210 L 530 210 L 530 250" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
-        {totalFlow > 0 && <path d="M 542 210 L 530 210 L 530 250" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
-        {/* Pump 2 (main/basement) output exits left, drops to trunk */}
+        {/* Pump 1 output exits left → return trunk */}
+        <path d="M 542 210 L 530 210 L 530 250 L 195 250 L 195 155" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        {totalFlow > 0 && <path d="M 542 210 L 530 210 L 530 250 L 195 250 L 195 155" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        {/* Pump 2 output exits left → joins trunk */}
         <path d="M 542 240 L 530 240 L 530 250" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
         {totalFlow > 0 && <path d="M 542 240 L 530 240 L 530 250" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
-        {/* Return trunk back to heater input */}
         <circle cx="530" cy="250" r="3" fill="#52525b" />
-        <path d="M 530 250 L 195 250 L 195 155" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
-        {totalFlow > 0 && <path d="M 530 250 L 195 250 L 195 155" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
         <text x="370" y="247" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirc Return</text>
       </svg>
     </div>
