@@ -158,14 +158,14 @@ const PlumbingDiagram = ({
 
         {/* ===== RECIRC RETURN ===== */}
         {/* Pump 2 (main/basement) is the trunk line back to input tee */}
-        <path d="M 552 250 L 552 270 L 195 270 L 195 155" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
-        {totalFlow > 0 && <path d="M 552 250 L 552 270 L 195 270 L 195 155" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        <path d="M 552 250 L 195 250 L 195 155" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        {totalFlow > 0 && <path d="M 552 250 L 195 250 L 195 155" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
         {/* Pump 1 (upstairs) drops down to join trunk at tee */}
-        <path d="M 552 220 L 552 240" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
-        {totalFlow > 0 && <path d="M 552 220 L 552 240" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        <path d="M 552 220 L 552 250" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        {totalFlow > 0 && <path d="M 552 220 L 552 250" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
         {/* Tee where upstairs return joins trunk */}
-        <circle cx="552" cy="240" r="3" fill="#52525b" />
-        <text x="370" y="267" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirc Return</text>
+        <circle cx="552" cy="250" r="3" fill="#52525b" />
+        <text x="370" y="247" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirc Return</text>
       </svg>
     </div>
   );
