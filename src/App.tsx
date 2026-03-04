@@ -163,11 +163,14 @@ const PlumbingDiagram = ({
         <text x="545" y="278" textAnchor="start" fill="#71717a" fontSize="6">Recirc</text>
         <text x="545" y="286" textAnchor="start" fill="#71717a" fontSize="6">Pumps</text>
 
-        {/* Return paths merge and go back to Rheem bottom */}
-        <path d="M 500 260 L 470 260 L 470 305 L 205 305 L 205 200" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
-        {totalFlow > 0 && <path d="M 500 260 L 470 260 L 470 305 L 205 305 L 205 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
-        <path d="M 500 292 L 470 292" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
-        {totalFlow > 0 && <path d="M 500 292 L 470 292" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        {/* Recirc return — Pump 2 (main/basement) is the trunk line */}
+        <path d="M 500 292 L 470 292 L 470 305 L 205 305 L 205 200" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        {totalFlow > 0 && <path d="M 500 292 L 470 292 L 470 305 L 205 305 L 205 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        {/* Pump 1 (upstairs) drops down to join trunk at tee */}
+        <path d="M 500 260 L 470 260 L 470 292" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        {totalFlow > 0 && <path d="M 500 260 L 470 260 L 470 292" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        {/* Tee where upstairs joins trunk */}
+        <circle cx="470" cy="292" r="3" fill="#52525b" />
         <text x="360" y="302" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirc Return</text>
       </svg>
     </div>
