@@ -169,6 +169,8 @@ const PlumbingDiagram = ({
 };
 
 function App() {
+  const RECIRC_FLOW_GPM = 1; // total recirc flow (~0.5 GPM per pump)
+
   // Preheat + Rheem state
   const [preheatTargetTemp, setPreheatTargetTemp] = useState(100);
   const [rheemTargetTemp, setRheemTargetTemp] = useState(135);
@@ -216,10 +218,18 @@ function App() {
       );
       setPreheatLayers(nextPreheat);
 
-      // Step 2: Rheem 80G — preheat output in, heated by heat pump
+      // Compute previous recirc return temp from prior state
+      const prevRheemOut = rLayers[0];
+      const prevTH = leftPortIsHot ? prevRheemOut : tL;
+      const prevTC = leftPortIsHot ? tL : prevRheemOut;
+      const prevMixed = r * prevTH + (1 - r) * prevTC;
+
+      // Step 2: Rheem — blended input from preheat output + recirc return
       const preheatOutTemp = nextPreheat[0];
+      const totalWHFlow = flowRate + RECIRC_FLOW_GPM;
+      const blendedInTemp = (preheatOutTemp * flowRate + prevMixed * RECIRC_FLOW_GPM) / totalWHFlow;
       const nextRheem = calculateStratifiedTankStep(
-        rLayers, rheem80Capacity, flowRate, preheatOutTemp,
+        rLayers, rheem80Capacity, totalWHFlow, blendedInTemp,
         rheemRecoveryRate, rheemTargetTemp, stepSeconds
       );
       setRheem80Layers(nextRheem);
@@ -231,15 +241,16 @@ function App() {
       const nextShuttleR = calculatePhysicalShuttleStep(r, tH, tC, setpoint, stepSeconds);
       setCurrentShuttleR(nextShuttleR);
 
-      // Step 4: Tankless — receives fraction of flow, pre-heated by Rheem output
-      const tanklessFlowVal = leftPortIsHot ? ((1 - nextShuttleR) * flowRate) : (nextShuttleR * flowRate);
+      // Step 4: Tankless — receives fraction of total flow through valve (demand + recirc)
+      const totalValveFlow = flowRate + RECIRC_FLOW_GPM;
+      const tanklessFlowVal = leftPortIsHot ? ((1 - nextShuttleR) * totalValveFlow) : (nextShuttleR * totalValveFlow);
       const tanklessResult = calculateTanklessStep(tanklessSetpoint, tanklessFlowVal, rheemOutTemp);
       setCurrentTanklessActual(tanklessResult.temp);
       setIsTanklessLimited(tanklessResult.isBTULimited);
     }, tickRateMs);
     return () => clearInterval(timer);
   }, [simSpeed, flowRate, preheatCapacity, rheem80Capacity, preheatRecoveryRate, rheemRecoveryRate,
-      preheatTargetTemp, rheemTargetTemp, coldInTemp, tanklessSetpoint, setpoint, leftPortIsHot]);
+      preheatTargetTemp, rheemTargetTemp, coldInTemp, tanklessSetpoint, setpoint, leftPortIsHot, RECIRC_FLOW_GPM]);
 
   // Derived values
   const rheemOut = rheem80Layers[0];
@@ -247,8 +258,9 @@ function App() {
   const tC_Source = leftPortIsHot ? currentTanklessActual : rheemOut;
   const tMixed = currentShuttleR * tH_Source + (1 - currentShuttleR) * tC_Source;
 
-  const tankFlow = leftPortIsHot ? (currentShuttleR * flowRate) : ((1 - currentShuttleR) * flowRate);
-  const tanklessFlow = leftPortIsHot ? ((1 - currentShuttleR) * flowRate) : (currentShuttleR * flowRate);
+  const totalFlow = flowRate + RECIRC_FLOW_GPM;
+  const tankFlow = leftPortIsHot ? (currentShuttleR * totalFlow) : ((1 - currentShuttleR) * totalFlow);
+  const tanklessFlow = leftPortIsHot ? ((1 - currentShuttleR) * totalFlow) : (currentShuttleR * totalFlow);
   const tankOnPort = leftPortIsHot ? 'hot' : 'cold';
 
   const minutesRemaining = calculateMinutesRemaining(rheem80Layers, rheem80Capacity, flowRate, rheemRecoveryRate, setpoint);
@@ -326,7 +338,7 @@ function App() {
                 </div>
               </div>
               {isTanklessLimited && <div style={{ marginBottom: '1rem', color: '#ef4444', fontWeight: 'bold', textAlign: 'center', border: '1px solid #ef4444', padding: '0.5rem', borderRadius: '0.5rem' }}>HEATER BTU LIMITED</div>}
-              {(tankFlow > (flowRate - 0.05) && tMixed >= setpoint - 0.5) ? (
+              {(() => { const demandTankFlow = leftPortIsHot ? (currentShuttleR * flowRate) : ((1 - currentShuttleR) * flowRate); return demandTankFlow > (flowRate - 0.05) && tMixed >= setpoint - 0.5; })() ? (
                 <div style={{ marginTop: '1rem', color: '#86efac', border: '1px solid #22c55e', padding: '0.75rem', borderRadius: '0.5rem', background: 'rgba(34, 197, 94, 0.1)' }}>
                   <strong>OPTIMAL STATE:</strong> Satisfied by tanks alone. Tankless remains dormant.
                 </div>
