@@ -181,8 +181,8 @@ function App() {
   const [coldInTemp, setColdInTemp] = useState(60);
   const [preheatCapacity] = useState(119);
   const [rheem80Capacity] = useState(80);
-  const [preheatRecoveryRate, setPreheatRecoveryRate] = useState(20);
-  const [rheemRecoveryRate, setRheemRecoveryRate] = useState(25);
+  const [preheatRecoveryRate, setPreheatRecoveryRate] = useState(109);
+  const [rheemRecoveryRate, setRheemRecoveryRate] = useState(7);
   const [preheatLayers, setPreheatLayers] = useState(new Array(10).fill(100));
   const [rheem80Layers, setRheem80Layers] = useState(new Array(10).fill(135));
 
@@ -324,8 +324,8 @@ function App() {
                 <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Water Heater Target: <span style={{ color: '#fafafa' }}>{rheemTargetTemp}°F</span></label><input type="range" min="100" max="160" value={rheemTargetTemp} onChange={e => setRheemTargetTemp(parseInt(e.target.value))} style={sliderStyle} /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}>
-                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Preheat Recovery: <span style={{ color: '#fafafa' }}>{preheatRecoveryRate} GPH ({formatBTU(preheatBTUh)} BTU/h)</span></label><input type="range" min="5" max="60" value={preheatRecoveryRate} onChange={e => setPreheatRecoveryRate(parseInt(e.target.value))} style={sliderStyle} /></div>
-                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Rheem Recovery: <span style={{ color: '#fafafa' }}>{rheemRecoveryRate} GPH ({formatBTU(rheemBTUh)} BTU/h)</span></label><input type="range" min="5" max="60" value={rheemRecoveryRate} onChange={e => setRheemRecoveryRate(parseInt(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Preheat Recovery: <span style={{ color: '#fafafa' }}>{preheatRecoveryRate} GPH ({formatBTU(preheatBTUh)} BTU/h)</span></label><input type="range" min="5" max="150" value={preheatRecoveryRate} onChange={e => setPreheatRecoveryRate(parseInt(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Rheem Recovery: <span style={{ color: '#fafafa' }}>{rheemRecoveryRate} GPH ({formatBTU(rheemBTUh)} BTU/h)</span></label><input type="range" min="1" max="30" value={rheemRecoveryRate} onChange={e => setRheemRecoveryRate(parseInt(e.target.value))} style={sliderStyle} /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}>
                 <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Mixing Valve Setpoint: <span style={{ color: '#fafafa' }}>{setpoint}°F</span></label><input type="range" min="85" max="160" value={setpoint} onChange={e => setSetpoint(parseInt(e.target.value))} style={sliderStyle} /></div>
