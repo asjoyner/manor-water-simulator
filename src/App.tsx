@@ -19,7 +19,7 @@ const getTempColor = (t: number) => {
 const PlumbingDiagram = ({
   preheatLayers, rheem80Layers, flowRate, coldInTemp, preheatCapacity, rheem80Capacity,
   currentShuttleR, leftPortIsHot, tTanklessActual, setpoint, tankFlow, tanklessFlow, isTanklessLimited,
-  totalFlow, recircFlow
+  totalFlow, recircFlow, upstairsPumpOn, mainBsmtPumpOn, onToggleUpstairs, onToggleMainBsmt
 }: any) => {
   const bronzeColor = '#b45309';
   const preheatOut = preheatLayers[0];
@@ -150,15 +150,19 @@ const PlumbingDiagram = ({
         <path d="M 575 210 L 562 210" fill="none" stroke={mixedColor} strokeWidth="3" />
         {totalFlow > 0 && <path d="M 575 210 L 562 210" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
 
-        {/* Pump 1 (Upstairs) */}
-        <circle cx="552" cy="210" r="10" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
-        <text x="552" y="213" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
-        <text x="552" y="197" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Upstairs</text>
+        {/* Pump 1 (Upstairs) — click to toggle */}
+        <g onClick={onToggleUpstairs} style={{ cursor: 'pointer' }}>
+          <circle cx="552" cy="210" r="10" fill={upstairsPumpOn ? '#1e3a5f' : '#27272a'} stroke={upstairsPumpOn ? '#3b82f6' : '#3f3f46'} strokeWidth="1.5" />
+          <text x="552" y="213" textAnchor="middle" fill={upstairsPumpOn ? '#93c5fd' : '#52525b'} fontSize="5" fontWeight="bold">{upstairsPumpOn ? 'ON' : 'OFF'}</text>
+          <text x="552" y="197" textAnchor="middle" fill={upstairsPumpOn ? '#a1a1aa' : '#52525b'} fontSize="7" fontWeight="bold">Upstairs</text>
+        </g>
 
-        {/* Pump 2 (Main/Basement) */}
-        <circle cx="552" cy="240" r="10" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
-        <text x="552" y="243" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
-        <text x="552" y="258" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Main/Bsmt</text>
+        {/* Pump 2 (Main/Basement) — click to toggle */}
+        <g onClick={onToggleMainBsmt} style={{ cursor: 'pointer' }}>
+          <circle cx="552" cy="240" r="10" fill={mainBsmtPumpOn ? '#1e3a5f' : '#27272a'} stroke={mainBsmtPumpOn ? '#3b82f6' : '#3f3f46'} strokeWidth="1.5" />
+          <text x="552" y="243" textAnchor="middle" fill={mainBsmtPumpOn ? '#93c5fd' : '#52525b'} fontSize="5" fontWeight="bold">{mainBsmtPumpOn ? 'ON' : 'OFF'}</text>
+          <text x="552" y="258" textAnchor="middle" fill={mainBsmtPumpOn ? '#a1a1aa' : '#52525b'} fontSize="7" fontWeight="bold">Main/Bsmt</text>
+        </g>
 
         {/* ===== RECIRC RETURN ===== */}
         {/* Pump 1 output exits left → return trunk */}
@@ -175,7 +179,10 @@ const PlumbingDiagram = ({
 };
 
 function App() {
-  const RECIRC_FLOW_GPM = 1; // total recirc flow (~0.5 GPM per pump)
+  // Pump toggle state (upstairs defaults off, main/bsmt defaults on)
+  const [upstairsPumpOn, setUpstairsPumpOn] = useState(false);
+  const [mainBsmtPumpOn, setMainBsmtPumpOn] = useState(true);
+  const RECIRC_FLOW_GPM = (upstairsPumpOn ? 0.5 : 0) + (mainBsmtPumpOn ? 0.5 : 0);
 
   // Preheat + Rheem state
   const [preheatTargetTemp, setPreheatTargetTemp] = useState(113);
@@ -234,7 +241,9 @@ function App() {
       // Step 2: Rheem — blended input from preheat output + recirc return
       const preheatOutTemp = nextPreheat[0];
       const totalWHFlow = flowRate + RECIRC_FLOW_GPM;
-      const blendedInTemp = (preheatOutTemp * flowRate + prevMixed * RECIRC_FLOW_GPM) / totalWHFlow;
+      const blendedInTemp = totalWHFlow > 0
+        ? (preheatOutTemp * flowRate + prevMixed * RECIRC_FLOW_GPM) / totalWHFlow
+        : preheatOutTemp;
       const nextRheem = calculateStratifiedTankStep(
         rLayers, rheem80Capacity, totalWHFlow, blendedInTemp,
         rheemRecoveryRate, rheemTargetTemp, stepSeconds
@@ -323,6 +332,8 @@ function App() {
               tTanklessActual={currentTanklessActual} setpoint={setpoint}
               tankFlow={tankFlow} tanklessFlow={tanklessFlow} isTanklessLimited={isTanklessLimited}
               totalFlow={totalFlow} recircFlow={RECIRC_FLOW_GPM}
+              upstairsPumpOn={upstairsPumpOn} mainBsmtPumpOn={mainBsmtPumpOn}
+              onToggleUpstairs={() => setUpstairsPumpOn(v => !v)} onToggleMainBsmt={() => setMainBsmtPumpOn(v => !v)}
             />
             <div style={{ background: '#18181b', padding: '2rem', borderRadius: '1rem', border: '1px solid #3f3f46' }}>
               <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '1.1rem' }}>Simulation Controls</h3>
