@@ -172,7 +172,7 @@ const PlumbingDiagram = ({
         <path d="M 542 240 L 530 240 L 530 250" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
         {totalFlow > 0 && <path d="M 542 240 L 530 240 L 530 250" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
         <circle cx="530" cy="250" r="3" fill="#52525b" />
-        <text x="250" y="263" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirc Return</text>
+        <text x="250" y="263" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirculation Return</text>
       </svg>
     </div>
   );
@@ -313,6 +313,19 @@ function App() {
   const totalStoredBTU = preheatStoredBTU + rheemStoredBTU;
   const storedTimeH = demandBTUh > 0 ? totalStoredBTU / demandBTUh : Infinity;
   const formatBTU = (v: number) => v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v.toFixed(0);
+  const showerBTU = 25 * 8.34 * Math.max(0, setpoint - coldInTemp); // 2.5 GPM × 10 min = 25 gal
+  const bathBTU = 60 * 8.34 * Math.max(0, setpoint - coldInTemp);   // 60 gal tub
+  const storedShowers = showerBTU > 0 ? totalStoredBTU / showerBTU : Infinity;
+  const storedBaths = bathBTU > 0 ? totalStoredBTU / bathBTU : Infinity;
+  const formatTime = (seconds: number) => {
+    if (!isFinite(seconds) || seconds < 0) return '';
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+  };
 
   const sliderStyle = { width: '100%', height: '6px', background: '#3f3f46', borderRadius: '5px', outline: 'none', margin: '15px 0' };
 
@@ -322,7 +335,7 @@ function App() {
         <header style={{ marginBottom: '3rem' }}><h1 style={{ fontSize: '2rem', fontWeight: 800, margin: 0 }}>Manor Water Simulator</h1><p style={{ color: '#a1a1aa' }}>Whole-House Thermal Modeling</p></header>
         <div>
             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-              <div style={{ flex: 1, background: '#18181b', padding: '1rem 1.5rem', borderRadius: '0.75rem', border: '1px solid #3f3f46', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><span style={{ fontSize: '0.875rem', color: '#a1a1aa', fontWeight: 600 }}>SIMULATION CLOCK</span><span style={{ fontFamily: 'monospace', fontSize: '1.5rem', color: '#6366f1', fontWeight: 'bold' }}>{elapsedSeconds.toFixed(0)}s</span></div>
+              <div style={{ flex: 1, background: '#18181b', padding: '1rem 1.5rem', borderRadius: '0.75rem', border: '1px solid #3f3f46', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><span style={{ fontSize: '0.875rem', color: '#a1a1aa', fontWeight: 600 }}>SIMULATION CLOCK</span><span style={{ fontFamily: 'monospace', fontSize: '1.5rem', color: '#6366f1', fontWeight: 'bold' }}>{formatTime(elapsedSeconds)}</span></div>
               <div style={{ width: '200px', background: '#18181b', padding: '1rem 1.5rem', borderRadius: '0.75rem', border: '1px solid #3f3f46' }}><label style={{ display: 'block', fontSize: '0.75rem', color: '#a1a1aa', fontWeight: 600, marginBottom: '0.5rem' }}>SPEED: {simSpeed}x</label><input type="range" min="1" max="300" value={simSpeed} onChange={e => setSimSpeed(parseInt(e.target.value))} style={{ width: '100%', margin: 0 }} /></div>
             </div>
             <PlumbingDiagram
@@ -367,7 +380,7 @@ function App() {
               </div>
             </div>
             <div style={{ background: '#27272a', padding: '1.5rem', borderRadius: '1rem', fontSize: '0.875rem', lineHeight: 1.6 }}>
-              <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#18181b', borderRadius: '0.5rem', border: '1px solid #3f3f46', textAlign: 'center' }}><span style={{ fontSize: '0.75rem', color: '#a1a1aa', display: 'block', marginBottom: '0.25rem' }}>ESTIMATED HOT WATER REMAINING</span><span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: minutesRemaining === Infinity ? '#22c55e' : minutesRemaining < 5 ? '#ef4444' : '#f97316' }}>{minutesRemaining === Infinity ? 'Infinite (Stable)' : `${minutesRemaining.toFixed(1)} Minutes`}</span></div>
+              <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#18181b', borderRadius: '0.5rem', border: '1px solid #3f3f46', textAlign: 'center' }}><span style={{ fontSize: '0.75rem', color: '#a1a1aa', display: 'block', marginBottom: '0.25rem' }}>ESTIMATED HOT WATER REMAINING</span><span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: minutesRemaining === Infinity ? '#22c55e' : minutesRemaining < 5 ? '#ef4444' : '#f97316' }}>{minutesRemaining === Infinity ? 'Infinite (Stable)' : formatTime(minutesRemaining * 60)}</span></div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
                 <div style={{ background: '#18181b', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #3f3f46', textAlign: 'center' }}>
                   <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>System Capacity</span>
@@ -432,7 +445,8 @@ function App() {
               <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
                 <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Total Stored</span>
                 <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#f59e0b' }}>{formatBTU(totalStoredBTU)} BTU</span>
-                <span style={{ fontSize: '0.7rem', color: '#a1a1aa', display: 'block' }}>{storedTimeH === Infinity ? 'No demand' : storedTimeH >= 1 ? `${storedTimeH.toFixed(1)}h at current demand` : `${(storedTimeH * 60).toFixed(0)}m at current demand`}</span>
+                <span style={{ fontSize: '0.7rem', color: '#a1a1aa', display: 'block' }}>{storedTimeH === Infinity ? 'No demand' : `${formatTime(storedTimeH * 3600)} at current demand`}</span>
+                <span style={{ fontSize: '0.7rem', color: '#a1a1aa', display: 'block' }}>{storedShowers.toFixed(1)} showers · {storedBaths.toFixed(1)} baths</span>
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
