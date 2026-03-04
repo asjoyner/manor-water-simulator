@@ -18,7 +18,8 @@ const getTempColor = (t: number) => {
 
 const PlumbingDiagram = ({
   preheatLayers, rheem80Layers, flowRate, coldInTemp, preheatCapacity, rheem80Capacity,
-  currentShuttleR, leftPortIsHot, tTanklessActual, setpoint, tankFlow, tanklessFlow, isTanklessLimited
+  currentShuttleR, leftPortIsHot, tTanklessActual, setpoint, tankFlow, tanklessFlow, isTanklessLimited,
+  totalFlow, recircFlow
 }: any) => {
   const bronzeColor = '#b45309';
   const preheatOut = preheatLayers[0];
@@ -145,12 +146,14 @@ const PlumbingDiagram = ({
 
         {/* Pump 1 → Upstairs Loop */}
         <path d="M 545 272 L 545 260 L 525 260" fill="none" stroke={mixedColor} strokeWidth="3" />
+        {totalFlow > 0 && <path d="M 545 272 L 545 260 L 525 260" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
         <circle cx="512" cy="260" r="10" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
         <text x="512" y="263" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
         <text x="512" y="246" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Upstairs Loop</text>
 
         {/* Pump 2 → Main/Basement Loop */}
         <path d="M 545 272 L 545 292 L 525 292" fill="none" stroke={mixedColor} strokeWidth="3" />
+        {totalFlow > 0 && <path d="M 545 272 L 545 292 L 525 292" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
         <circle cx="512" cy="292" r="10" fill="#27272a" stroke="#3f3f46" strokeWidth="1.5" />
         <text x="512" y="295" textAnchor="middle" fill="#a1a1aa" fontSize="5" fontWeight="bold">PUMP</text>
         <text x="512" y="312" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Main/Basement</text>
@@ -161,7 +164,9 @@ const PlumbingDiagram = ({
 
         {/* Return paths merge and go back to Rheem bottom */}
         <path d="M 500 260 L 470 260 L 470 305 L 205 305 L 205 200" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        {totalFlow > 0 && <path d="M 500 260 L 470 260 L 470 305 L 205 305 L 205 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
         <path d="M 500 292 L 470 292" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        {totalFlow > 0 && <path d="M 500 292 L 470 292" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
         <text x="360" y="302" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirc Return</text>
       </svg>
     </div>
@@ -291,6 +296,7 @@ function App() {
               currentShuttleR={currentShuttleR} leftPortIsHot={leftPortIsHot}
               tTanklessActual={currentTanklessActual} setpoint={setpoint}
               tankFlow={tankFlow} tanklessFlow={tanklessFlow} isTanklessLimited={isTanklessLimited}
+              totalFlow={totalFlow} recircFlow={RECIRC_FLOW_GPM}
             />
             <div style={{ background: '#18181b', padding: '2rem', borderRadius: '1rem', border: '1px solid #3f3f46' }}>
               <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '1.1rem' }}>Simulation Controls</h3>
