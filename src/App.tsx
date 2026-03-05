@@ -288,9 +288,15 @@ function App() {
       const blendedInTemp = totalWHFlow > 0
         ? (preheatOutTemp * flowRate + recircReturnTemp * RECIRC_FLOW_GPM) / totalWHFlow
         : preheatOutTemp;
+      // Rheem recovery is rated at (rheemTargetTemp - coldInTemp) delta.
+      // Scale GPH so BTU/hr stays constant when inlet is warmer than cold supply.
+      const rheemRefDegGalPerHr = rheemRecoveryRate * Math.max(0, rheemTargetTemp - coldInTemp);
+      const rheemInletDelta = Math.max(1, rheemTargetTemp - blendedInTemp);
+      const effectiveRheemRecovery = rheemRefDegGalPerHr / rheemInletDelta;
+
       const nextRheem = calculateStratifiedTankStep(
         rLayers, rheem80Capacity, totalWHFlow, blendedInTemp,
-        rheemRecoveryRate, rheemTargetTemp, stepSeconds
+        effectiveRheemRecovery, rheemTargetTemp, stepSeconds
       );
       setRheem80Layers(nextRheem);
 
