@@ -149,16 +149,27 @@ const PlumbingDiagram = ({
         <path d="M 575 160 L 575 240 L 562 240" fill="none" stroke={mixedColor} strokeWidth="4" />
         {recircFlow > 0 && <path d="M 575 160 L 575 240 L 562 240" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
 
-        {/* ===== OUTPUT FAUCET (branches up from tee at output corner) ===== */}
+        {/* ===== OUTPUT FAUCET / HOSE BIB (branches up from tee) ===== */}
         <circle cx="575" cy="160" r="3" fill="#52525b" />
-        <path d="M 575 157 L 575 100" fill="none" stroke={mixedColor} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 575 157 L 575 100" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <path d="M 575 157 L 575 105" fill="none" stroke={mixedColor} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 575 157 L 575 105" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
         <g onClick={onToggleFaucet} style={{ cursor: 'pointer' }}>
-          <circle cx="575" cy="90" r="10" fill={faucetOn ? '#1e3a5f' : '#27272a'} stroke={faucetOn ? '#3b82f6' : '#3f3f46'} strokeWidth="1.5" />
-          <text x="575" y="93" textAnchor="middle" fill={faucetOn ? '#93c5fd' : '#52525b'} fontSize="5" fontWeight="bold">{faucetOn ? 'ON' : 'OFF'}</text>
-          <text x="575" y="77" textAnchor="middle" fill={faucetOn ? '#a1a1aa' : '#52525b'} fontSize="7" fontWeight="bold">Faucet</text>
+          {/* Hose bib body */}
+          <rect x="568" y="95" width="14" height="14" rx="3" fill={faucetOn ? '#1e3a5f' : '#27272a'} stroke={faucetOn ? '#3b82f6' : '#3f3f46'} strokeWidth="1.5" />
+          {/* Circular handle on top */}
+          <circle cx="575" cy="88" r="7" fill="none" stroke={faucetOn ? '#3b82f6' : '#3f3f46'} strokeWidth="2" />
+          <circle cx="575" cy="88" r="2" fill={faucetOn ? '#93c5fd' : '#52525b'} />
+          {/* Spout pointing right */}
+          <path d="M 582 102 L 595 102 L 595 106" fill="none" stroke={faucetOn ? '#3b82f6' : '#3f3f46'} strokeWidth="2.5" strokeLinecap="round" />
+          {/* Water drips when running */}
+          {flowRate > 0 && <>
+            <line x1="595" y1="108" x2="595" y2="114" stroke={mixedColor} strokeWidth="2" strokeLinecap="round" opacity="0.8" />
+            <circle cx="595" cy="118" r="1.5" fill={mixedColor} opacity="0.6" />
+            <circle cx="595" cy="125" r="1" fill={mixedColor} opacity="0.4" />
+          </>}
         </g>
-        <text x="575" y="108" textAnchor="middle" fill={mixedColor} fontSize="7" fontWeight="bold">{flowRate.toFixed(1)} GPM</text>
+        <text x="575" y="78" textAnchor="middle" fill={faucetOn ? '#a1a1aa' : '#52525b'} fontSize="7" fontWeight="bold">Faucet</text>
+        <text x="590" y="140" textAnchor="start" fill={mixedColor} fontSize="7" fontWeight="bold">{flowRate.toFixed(1)} GPM</text>
 
         {/* ===== RECIRC PUMPS ===== */}
 
