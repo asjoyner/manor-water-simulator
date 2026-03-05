@@ -96,9 +96,13 @@ const PlumbingDiagram = ({
         {flowRate > 0 && <path d="M 160 120 L 195 120" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
         <text x="178" y="115" textAnchor="middle" fill={getTempColor(preheatOut)} fontSize="8" fontWeight="bold">{preheatOut.toFixed(0)}°F</text>
 
-        {/* ===== PREHEAT → RHEEM (down to bottom inlet) ===== */}
-        <path d="M 195 120 L 195 200 L 220 200" fill="none" stroke={getTempColor(preheatOut)} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 195 120 L 195 200 L 220 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        {/* ===== PREHEAT → TEE (vertical segment, only flows with faucet demand) ===== */}
+        <path d="M 195 120 L 195 200" fill="none" stroke={getTempColor(preheatOut)} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 195 120 L 195 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+
+        {/* ===== TEE → RHEEM INPUT (horizontal, flows with demand + recirc) ===== */}
+        <path d="M 195 200 L 220 200" fill="none" stroke={getTempColor(preheatOut)} strokeWidth="4" />
+        {(flowRate > 0 || recircFlow > 0) && <path d="M 195 200 L 220 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate + recircFlow) }} />}
 
         {/* ===== INPUT TEE (recirc return joins at bottom) ===== */}
         <circle cx="195" cy="200" r="4" fill="#52525b" />
@@ -113,9 +117,9 @@ const PlumbingDiagram = ({
         <text x="250" y="128" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{rheem80Layers[0].toFixed(0)}°F</text>
         <text x="250" y="200" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{rheem80Layers[rheem80Layers.length-1].toFixed(0)}°F</text>
 
-        {/* ===== RHEEM OUTPUT (top) → TEE ===== */}
+        {/* ===== RHEEM OUTPUT (top) → TEE (flows with demand + recirc) ===== */}
         <path d="M 280 120 L 310 120 L 310 130" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 280 120 L 310 120 L 310 130" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        {(flowRate > 0 || recircFlow > 0) && <path d="M 280 120 L 310 120 L 310 130" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate + recircFlow) }} />}
         <circle cx="310" cy="130" r="4" fill="#52525b" />
 
         {/* ===== BYPASS PATH: TEE → straight to valve upper port ===== */}
@@ -151,9 +155,16 @@ const PlumbingDiagram = ({
         {(flowRate > 0 || recircFlow > 0) && <path d="M 500 160 L 575 160" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate + recircFlow) }} />}
         <text x="537" y="174" textAnchor="middle" fill={mixedColor} fontSize="10" fontWeight="bold">{tMixed.toFixed(1)}°F</text>
 
-        {/* ===== TEE → DOWN TO RECIRC PUMPS (only when pumps active) ===== */}
-        <path d="M 575 160 L 575 240 L 562 240" fill="none" stroke={mixedColor} strokeWidth="4" />
-        {recircFlow > 0 && <path d="M 575 160 L 575 240 L 562 240" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        {/* ===== TEE → DOWN TO RECIRC PUMPS ===== */}
+        {/* Shared vertical to upstairs pump branch (y=210) */}
+        <path d="M 575 160 L 575 210" fill="none" stroke={mixedColor} strokeWidth="4" />
+        {recircFlow > 0 && <path d="M 575 160 L 575 210" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        {/* Vertical continuation to main/bsmt pump (y=240) */}
+        <path d="M 575 210 L 575 240" fill="none" stroke={mixedColor} strokeWidth="4" />
+        {mainBsmtPumpOn && <path d="M 575 210 L 575 240" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(0.5) }} />}
+        {/* Branch to main/bsmt pump inlet */}
+        <path d="M 575 240 L 562 240" fill="none" stroke={mixedColor} strokeWidth="4" />
+        {mainBsmtPumpOn && <path d="M 575 240 L 562 240" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(0.5) }} />}
 
         {/* ===== OUTPUT FAUCET / HOSE BIB (branches up from tee) ===== */}
         <circle cx="575" cy="160" r="3" fill="#52525b" />
@@ -179,9 +190,9 @@ const PlumbingDiagram = ({
 
         {/* ===== RECIRC PUMPS ===== */}
 
-        {/* Tee from vertical to upstairs pump */}
+        {/* Branch to upstairs pump inlet */}
         <path d="M 575 210 L 562 210" fill="none" stroke={mixedColor} strokeWidth="3" />
-        {recircFlow > 0 && <path d="M 575 210 L 562 210" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        {upstairsPumpOn && <path d="M 575 210 L 562 210" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(0.5) }} />}
 
         {/* Pump 1 (Upstairs) — click to toggle */}
         <g onClick={onToggleUpstairs} style={{ cursor: 'pointer' }}>
@@ -198,12 +209,15 @@ const PlumbingDiagram = ({
         </g>
 
         {/* ===== RECIRC RETURN ===== */}
-        {/* Pump 1 output exits left → return trunk */}
-        <path d="M 542 210 L 530 210 L 530 250 L 195 250 L 195 200" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
-        {recircFlow > 0 && <path d="M 542 210 L 530 210 L 530 250 L 195 250 L 195 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
-        {/* Pump 2 output exits left → joins trunk */}
+        {/* Pump 1 (upstairs) output → trunk junction */}
+        <path d="M 542 210 L 530 210 L 530 250" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        {upstairsPumpOn && <path d="M 542 210 L 530 210 L 530 250" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(0.5) }} />}
+        {/* Pump 2 (main/bsmt) output → trunk junction */}
         <path d="M 542 240 L 530 240 L 530 250" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
-        {recircFlow > 0 && <path d="M 542 240 L 530 240 L 530 250" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        {mainBsmtPumpOn && <path d="M 542 240 L 530 240 L 530 250" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(0.5) }} />}
+        {/* Shared return trunk → Rheem input tee */}
+        <path d="M 530 250 L 195 250 L 195 200" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        {recircFlow > 0 && <path d="M 530 250 L 195 250 L 195 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
         <circle cx="530" cy="250" r="3" fill="#52525b" />
         <text x="250" y="263" textAnchor="middle" fill="#a1a1aa" fontSize="7" fontWeight="bold">Recirculation Return</text>
       </svg>
