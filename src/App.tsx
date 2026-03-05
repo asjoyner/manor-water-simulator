@@ -108,18 +108,18 @@ const PlumbingDiagram = ({
         <text x="250" y="200" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" style={{ textShadow: '0 0 3px black' }}>{rheem80Layers[rheem80Layers.length-1].toFixed(0)}°F</text>
 
         {/* ===== RHEEM OUTPUT (top) → TEE ===== */}
-        <path d="M 280 120 L 310 120 L 310 155" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 280 120 L 310 120 L 310 155" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
-        <circle cx="310" cy="155" r="4" fill="#52525b" />
+        <path d="M 280 120 L 310 120 L 310 130" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 280 120 L 310 120 L 310 130" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <circle cx="310" cy="130" r="4" fill="#52525b" />
 
         {/* ===== BYPASS PATH: TEE → straight to valve upper port ===== */}
-        <path d="M 310 155 L 450 155" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="8" />
-        {tankFlow > 0.1 && <path d="M 310 155 L 450 155" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tankFlow) }} />}
-        <text x="380" y="148" textAnchor="middle" fill={getTempColor(rheemOut)} fontSize="8" fontWeight="bold">{rheemOut.toFixed(0)}°F</text>
+        <path d="M 310 130 L 450 130" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="8" />
+        {tankFlow > 0.1 && <path d="M 310 130 L 450 130" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tankFlow) }} />}
+        <text x="380" y="124" textAnchor="middle" fill={getTempColor(rheemOut)} fontSize="8" fontWeight="bold">{rheemOut.toFixed(0)}°F</text>
 
         {/* ===== TANKLESS PATH: TEE → down → right into tankless (below bypass) ===== */}
-        <path d="M 310 155 L 310 200 L 360 200" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" opacity="0.8" />
-        {tanklessFlow > 0.1 && <path d="M 310 155 L 310 200 L 360 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
+        <path d="M 310 130 L 310 198 L 360 198" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" opacity="0.8" />
+        {tanklessFlow > 0.1 && <path d="M 310 130 L 310 198 L 360 198" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
 
         {/* ===== RINNAI TANKLESS (below bypass pipe) ===== */}
         <rect x="360" y="170" width="60" height="60" rx="5" fill="#27272a" stroke={isTanklessLimited ? "#ef4444" : "#3f3f46"} strokeWidth="2" />
@@ -128,9 +128,9 @@ const PlumbingDiagram = ({
         <text x="390" y="203" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">{tTanklessActual.toFixed(1)}°F</text>
 
         {/* ===== TANKLESS → VALVE LOWER PORT (straight line) ===== */}
-        <path d="M 420 200 L 450 200" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="8" />
-        {tanklessFlow > 0.1 && <path d="M 420 200 L 450 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
-        <text x="435" y="214" textAnchor="middle" fill={getTempColor(tTanklessActual)} fontSize="8" fontWeight="bold">{tTanklessActual.toFixed(0)}°F</text>
+        <path d="M 420 198 L 450 198" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="8" />
+        {tanklessFlow > 0.1 && <path d="M 420 198 L 450 198" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
+        <text x="435" y="212" textAnchor="middle" fill={getTempColor(tTanklessActual)} fontSize="8" fontWeight="bold">{tTanklessActual.toFixed(0)}°F</text>
 
         {/* ===== APOLLO MIXING VALVE (same height as tanks) ===== */}
         <rect x="450" y="110" width="50" height="100" rx="8" fill={bronzeColor} stroke="#92400e" strokeWidth="2" />
