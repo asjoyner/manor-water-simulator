@@ -90,12 +90,12 @@ const PlumbingDiagram = ({
         {flowRate > 0 && <path d="M 160 120 L 195 120" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
         <text x="178" y="115" textAnchor="middle" fill={getTempColor(preheatOut)} fontSize="8" fontWeight="bold">{preheatOut.toFixed(0)}°F</text>
 
-        {/* ===== INPUT TEE (recirc return joins here) ===== */}
-        <circle cx="195" cy="120" r="4" fill="#52525b" />
-
-        {/* ===== TEE → RHEEM (down to bottom inlet) ===== */}
+        {/* ===== PREHEAT → RHEEM (down to bottom inlet) ===== */}
         <path d="M 195 120 L 195 210 L 220 210" fill="none" stroke={getTempColor(preheatOut)} strokeWidth="4" />
         {flowRate > 0 && <path d="M 195 120 L 195 210 L 220 210" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+
+        {/* ===== INPUT TEE (recirc return joins at bottom) ===== */}
+        <circle cx="195" cy="210" r="4" fill="#52525b" />
 
         {/* ===== RHEEM HEAT PUMP WATER HEATER (same level as preheat) ===== */}
         <rect x="220" y="110" width="60" height="100" rx="5" fill="#27272a" stroke="#3f3f46" strokeWidth="2" />
@@ -182,8 +182,8 @@ const PlumbingDiagram = ({
 
         {/* ===== RECIRC RETURN ===== */}
         {/* Pump 1 output exits left → return trunk */}
-        <path d="M 542 210 L 530 210 L 530 250 L 195 250 L 195 120" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
-        {recircFlow > 0 && <path d="M 542 210 L 530 210 L 530 250 L 195 250 L 195 120" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        <path d="M 542 210 L 530 210 L 530 250 L 195 250 L 195 210" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        {recircFlow > 0 && <path d="M 542 210 L 530 210 L 530 250 L 195 250 L 195 210" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
         {/* Pump 2 output exits left → joins trunk */}
         <path d="M 542 240 L 530 240 L 530 250" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
         {recircFlow > 0 && <path d="M 542 240 L 530 240 L 530 250" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
