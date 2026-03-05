@@ -167,8 +167,8 @@ const PlumbingDiagram = ({
             <path d="M 595 108 L 595 130" fill="none" stroke="white" strokeWidth="1.5" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />
           </>}
         </g>
+        <text x="575" y="70" textAnchor="middle" fill={mixedColor} fontSize="7" fontWeight="bold">{flowRate.toFixed(1)} GPM</text>
         <text x="575" y="78" textAnchor="middle" fill={faucetOn ? '#a1a1aa' : '#52525b'} fontSize="7" fontWeight="bold">Faucet</text>
-        <text x="590" y="140" textAnchor="start" fill={mixedColor} fontSize="7" fontWeight="bold">{flowRate.toFixed(1)} GPM</text>
 
         {/* ===== RECIRC PUMPS ===== */}
 
