@@ -330,9 +330,13 @@ function App() {
   const maxRinnaiBTU = 199000 * 0.97;
   const rheemDeltaT = Math.max(0, rheemTargetTemp - coldInTemp);
   const maxRheemBTU = rheemRecoveryRate * 8.34 * rheemDeltaT;
-  const totalSystemBTU = maxRinnaiBTU + maxRheemBTU;
+  // Recirc parasitic load: BTU/hr the Rheem must spend reheating cooled return water
+  const recircParasiticBTU = ((upstairsPumpOn ? 0.5 : 0) * upstairsLoopDeltaT
+    + (mainBsmtPumpOn ? 0.5 : 0) * mainBsmtLoopDeltaT) * 500.4;
+  const effectiveRheemBTU = Math.max(0, maxRheemBTU - recircParasiticBTU);
+  const totalSystemBTU = maxRinnaiBTU + effectiveRheemBTU;
   let maxSystemGPM = totalSystemBTU / (500.4 * Math.max(1, setpoint - coldInTemp));
-  if (tanklessSetpoint < setpoint) { maxSystemGPM = maxRheemBTU / (500.4 * Math.max(1, setpoint - coldInTemp)); }
+  if (tanklessSetpoint < setpoint) { maxSystemGPM = effectiveRheemBTU / (500.4 * Math.max(1, setpoint - coldInTemp)); }
 
   // BTU calculations
   const preheatBTUh = preheatRecoveryRate * 8.34 * Math.max(0, preheatTargetTemp - coldInTemp);
@@ -341,13 +345,14 @@ function App() {
   // Optimal flow: max GPM at setpoint sustainable by tank recovery alone
   // Tanks are in series: preheat heats cold→preheatTarget, Rheem heats preheatTarget→setpoint
   // Bottleneck is whichever tank has less capacity relative to its required ΔT
+  const effectiveRheemBTUh = Math.max(0, rheemBTUh - recircParasiticBTU);
   const rheemGapTemp = setpoint - preheatTargetTemp;
   const maxOptimalGPM = rheemGapTemp <= 0
     ? preheatBTUh / (500.4 * Math.max(1, setpoint - coldInTemp))
     : rheemTargetTemp < setpoint ? 0
     : Math.min(
         preheatBTUh / (500.4 * Math.max(1, preheatTargetTemp - coldInTemp)),
-        rheemBTUh / (500.4 * rheemGapTemp)
+        effectiveRheemBTUh / (500.4 * rheemGapTemp)
       );
   const tanklessBTUh = maxRinnaiBTU;
   const demandBTUh = flowRate * 500.4 * Math.max(0, tMixed - coldInTemp);
