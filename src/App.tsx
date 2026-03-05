@@ -24,7 +24,7 @@ const Tip = ({ text }: { text: string }) => (
 
 const PlumbingDiagram = ({
   preheatLayers, rheem80Layers, flowRate, coldInTemp, preheatCapacity, rheem80Capacity,
-  currentShuttleR, leftPortIsHot, tTanklessActual, setpoint, tankFlow, tanklessFlow, isTanklessLimited,
+  currentShuttleR, leftPortIsHot, tTanklessActual, tanklessSetpoint, setpoint, tankFlow, tanklessFlow, isTanklessLimited,
   totalFlow, recircFlow, upstairsPumpOn, mainBsmtPumpOn, onToggleUpstairs, onToggleMainBsmt,
   faucetOn, onToggleFaucet, gallonsDispensed
 }: any) => {
@@ -132,10 +132,10 @@ const PlumbingDiagram = ({
         {tanklessFlow > 0.1 && <path d="M 310 130 L 310 198 L 360 198" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
 
         {/* ===== RINNAI TANKLESS (below bypass pipe) ===== */}
+        <text x="390" y="165" textAnchor="middle" fill="#818cf8" fontSize="8" fontWeight="bold">SET: {tanklessSetpoint}°F</text>
         <rect x="360" y="170" width="60" height="60" rx="5" fill="#27272a" stroke={isTanklessLimited ? "#ef4444" : "#3f3f46"} strokeWidth="2" />
-        <path d="M 370 180 L 410 180 L 370 195 L 410 195 L 370 210 L 410 210" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="2" />
+        <path d="M 370 180 L 410 180 L 370 195 L 410 195 L 370 210 L 410 210" fill="none" stroke={tanklessFlow > 0.1 ? '#ef4444' : '#52525b'} strokeWidth="2" />
         <text x="390" y="242" textAnchor="middle" fill={isTanklessLimited ? "#ef4444" : "#eee"} fontSize="9" fontWeight="bold">Tankless Heater</text>
-        <text x="390" y="203" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">{tTanklessActual.toFixed(1)}°F</text>
 
         {/* ===== TANKLESS → VALVE LOWER PORT (straight line) ===== */}
         <path d="M 420 198 L 450 198" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="4" />
@@ -438,7 +438,7 @@ function App() {
               preheatLayers={preheatLayers} rheem80Layers={rheem80Layers} flowRate={flowRate}
               coldInTemp={coldInTemp} preheatCapacity={preheatCapacity} rheem80Capacity={rheem80Capacity}
               currentShuttleR={currentShuttleR} leftPortIsHot={leftPortIsHot}
-              tTanklessActual={currentTanklessActual} setpoint={setpoint}
+              tTanklessActual={currentTanklessActual} tanklessSetpoint={tanklessSetpoint} setpoint={setpoint}
               tankFlow={tankFlow} tanklessFlow={tanklessFlow} isTanklessLimited={isTanklessLimited}
               totalFlow={totalFlow} recircFlow={RECIRC_FLOW_GPM}
               upstairsPumpOn={upstairsPumpOn} mainBsmtPumpOn={mainBsmtPumpOn}
