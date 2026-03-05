@@ -143,7 +143,7 @@ const PlumbingDiagram = ({
         {/* ===== VALVE OUTPUT → HORIZONTAL TO TEE ===== */}
         <path d="M 500 160 L 575 160" fill="none" stroke={mixedColor} strokeWidth="4" />
         {(flowRate > 0 || recircFlow > 0) && <path d="M 500 160 L 575 160" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate + recircFlow) }} />}
-        <text x="540" y="174" fill={mixedColor} fontSize="10" fontWeight="bold">{tMixed.toFixed(1)}°F</text>
+        <text x="537" y="174" textAnchor="middle" fill={mixedColor} fontSize="10" fontWeight="bold">{tMixed.toFixed(1)}°F</text>
 
         {/* ===== TEE → DOWN TO RECIRC PUMPS (only when pumps active) ===== */}
         <path d="M 575 160 L 575 240 L 562 240" fill="none" stroke={mixedColor} strokeWidth="4" />
