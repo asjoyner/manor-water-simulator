@@ -161,11 +161,10 @@ const PlumbingDiagram = ({
           <circle cx="575" cy="88" r="2" fill={faucetOn ? mixedColor : '#52525b'} />
           {/* Spout pointing right */}
           <path d="M 582 102 L 595 102 L 595 106" fill="none" stroke={faucetOn ? mixedColor : '#3f3f46'} strokeWidth="2.5" strokeLinecap="round" />
-          {/* Water drips when running */}
+          {/* Water stream when running */}
           {flowRate > 0 && <>
-            <line x1="595" y1="108" x2="595" y2="114" stroke={mixedColor} strokeWidth="2" strokeLinecap="round" opacity="0.8" />
-            <circle cx="595" cy="118" r="1.5" fill={mixedColor} opacity="0.6" />
-            <circle cx="595" cy="125" r="1" fill={mixedColor} opacity="0.4" />
+            <path d="M 595 108 L 595 130" fill="none" stroke={mixedColor} strokeWidth="2" />
+            <path d="M 595 108 L 595 130" fill="none" stroke="white" strokeWidth="1.5" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />
           </>}
         </g>
         <text x="575" y="78" textAnchor="middle" fill={faucetOn ? '#a1a1aa' : '#52525b'} fontSize="7" fontWeight="bold">Faucet</text>
