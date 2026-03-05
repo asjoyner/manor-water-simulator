@@ -20,7 +20,7 @@ const PlumbingDiagram = ({
   preheatLayers, rheem80Layers, flowRate, coldInTemp, preheatCapacity, rheem80Capacity,
   currentShuttleR, leftPortIsHot, tTanklessActual, setpoint, tankFlow, tanklessFlow, isTanklessLimited,
   totalFlow, recircFlow, upstairsPumpOn, mainBsmtPumpOn, onToggleUpstairs, onToggleMainBsmt,
-  faucetOn, onToggleFaucet
+  faucetOn, onToggleFaucet, gallonsDispensed
 }: any) => {
   const bronzeColor = '#b45309';
   const preheatOut = preheatLayers[0];
@@ -169,6 +169,7 @@ const PlumbingDiagram = ({
         </g>
         <text x="575" y="70" textAnchor="middle" fill={mixedColor} fontSize="7" fontWeight="bold">{flowRate.toFixed(1)} GPM</text>
         <text x="575" y="78" textAnchor="middle" fill={faucetOn ? '#a1a1aa' : '#52525b'} fontSize="7" fontWeight="bold">Faucet</text>
+        <text x="595" y="140" textAnchor="middle" fill="#a1a1aa" fontSize="7">{gallonsDispensed.toFixed(1)} gal</text>
 
         {/* ===== RECIRC PUMPS ===== */}
 
@@ -249,6 +250,7 @@ function App() {
   };
   const [simSpeed, setSimSpeed] = useState(1);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [gallonsDispensed, setGallonsDispensed] = useState(0);
 
   const stateRef = useRef({ preheatLayers, rheem80Layers, currentShuttleR, currentTanklessActual });
   stateRef.current = { preheatLayers, rheem80Layers, currentShuttleR, currentTanklessActual };
@@ -258,6 +260,7 @@ function App() {
     const timer = setInterval(() => {
       const stepSeconds = (tickRateMs / 1000) * simSpeed;
       setElapsedSeconds(prev => prev + stepSeconds);
+      setGallonsDispensed(prev => prev + flowRate * stepSeconds / 60);
       const { preheatLayers: pLayers, rheem80Layers: rLayers, currentShuttleR: r, currentTanklessActual: tL } = stateRef.current;
 
       // Step 1: Preheat tank — cold water in, heated by heat pump loop
@@ -403,7 +406,7 @@ function App() {
               totalFlow={totalFlow} recircFlow={RECIRC_FLOW_GPM}
               upstairsPumpOn={upstairsPumpOn} mainBsmtPumpOn={mainBsmtPumpOn}
               onToggleUpstairs={() => setUpstairsPumpOn(v => !v)} onToggleMainBsmt={() => setMainBsmtPumpOn(v => !v)}
-              faucetOn={faucetOn} onToggleFaucet={toggleFaucet}
+              faucetOn={faucetOn} onToggleFaucet={toggleFaucet} gallonsDispensed={gallonsDispensed}
             />
             <div style={{ background: '#18181b', padding: '2rem', borderRadius: '1rem', border: '1px solid #3f3f46' }}>
               <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '1.1rem' }}>Simulation Controls</h3>
