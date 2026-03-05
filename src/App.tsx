@@ -155,12 +155,12 @@ const PlumbingDiagram = ({
         {flowRate > 0 && <path d="M 575 157 L 575 105" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
         <g onClick={onToggleFaucet} style={{ cursor: 'pointer' }}>
           {/* Hose bib body */}
-          <rect x="568" y="95" width="14" height="14" rx="3" fill={faucetOn ? '#1e3a5f' : '#27272a'} stroke={faucetOn ? '#3b82f6' : '#3f3f46'} strokeWidth="1.5" />
+          <rect x="568" y="95" width="14" height="14" rx="3" fill={faucetOn ? '#1e3a5f' : '#27272a'} stroke={faucetOn ? mixedColor : '#3f3f46'} strokeWidth="1.5" />
           {/* Circular handle on top */}
-          <circle cx="575" cy="88" r="7" fill="none" stroke={faucetOn ? '#3b82f6' : '#3f3f46'} strokeWidth="2" />
-          <circle cx="575" cy="88" r="2" fill={faucetOn ? '#93c5fd' : '#52525b'} />
+          <circle cx="575" cy="88" r="7" fill="none" stroke={faucetOn ? mixedColor : '#3f3f46'} strokeWidth="2" />
+          <circle cx="575" cy="88" r="2" fill={faucetOn ? mixedColor : '#52525b'} />
           {/* Spout pointing right */}
-          <path d="M 582 102 L 595 102 L 595 106" fill="none" stroke={faucetOn ? '#3b82f6' : '#3f3f46'} strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M 582 102 L 595 102 L 595 106" fill="none" stroke={faucetOn ? mixedColor : '#3f3f46'} strokeWidth="2.5" strokeLinecap="round" />
           {/* Water drips when running */}
           {flowRate > 0 && <>
             <line x1="595" y1="108" x2="595" y2="114" stroke={mixedColor} strokeWidth="2" strokeLinecap="round" opacity="0.8" />
