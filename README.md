@@ -1,31 +1,17 @@
-# Manor Water Simulator
+# Joyner Manor Water Simulator
 
 **[Try the live simulator](https://asjoyner.github.io/manor-water-simulator/)**
 
 ## Overview
 
-Interactive whole-house hot water system simulator with a real-time animated SVG plumbing diagram. Models the complete thermal behavior of a series-hybrid domestic hot water architecture including stratified tank physics, thermostatic mixing, tankless boosting, and recirculation losses. Extended from the [Apollo Mixing Valve Simulator](https://github.com/asjoyner/mixing-simulator).
+This is an interactive simulator for the hot water system at Joyner Manor.  It centers on a real-time animated SVG plumbing diagram, and models the complete thermal behavior of the series-hybrid domestic hot water architecture including stratified tank physics, thermostatic mixing, tankless boosting, and recirculation losses.  This was extended from the very basic [Apollo Mixing Valve Simulator](https://github.com/asjoyner/mixing-simulator) that I built to understand how to set up the mixing valve.  The main value of this simulation is to play with set points, understand recovery times, and figure out what I'll want to measure in the real system.
 
 ## System Architecture
 
-```
-Cold Water ──► HTP GL119 (119G Indirect Preheat) ──► Rheem PROPH80 (80G Heat Pump) ──┐
-                     ▲                                                                 │
-              Non-Potable Loop                                                         ▼
-         Mitsubishi VRF Heat Pump                                            Apollo Mixing Valve
-         Grundfos Circulator Pump                                           (thermostatic, 125°F)
-         20G Buffer Tank                                                       │           │
-                                                                          Bypass        Rinnai
-                                                                          (tank)     RX199iN
-                                                                               │       (tankless)
-                                                                               ▼       │
-                                                                         Mixed Output ◄─┘
-                                                                           │       │
-                                                                        Faucet   Recirc Pumps
-                                                                                (upstairs + main/bsmt)
-```
+![Screenshot of Simulation UI](images/screenshot.png)
 
-### Hardware modeled
+
+### Hardware this is based on
 - **HTP GL119** — 119-gallon indirect preheat tank, heated by non-potable ground-source loop
 - **Mitsubishi-Trane TPWFYP036AU141A** — VRF heat pump driving the preheat loop
 - **Grundfos UP15-29SF** — circulator pump for non-potable preheat loop
