@@ -16,6 +16,12 @@ const getTempColor = (t: number) => {
   }
 };
 
+const Tip = ({ text }: { text: string }) => (
+  <span title={text} style={{ display: 'inline-block', width: 14, height: 14, lineHeight: '14px',
+    borderRadius: '50%', border: '1px solid #52525b', color: '#71717a', fontSize: '0.6rem',
+    textAlign: 'center', marginLeft: 4, cursor: 'help', verticalAlign: 'middle' }}>?</span>
+);
+
 const PlumbingDiagram = ({
   preheatLayers, rheem80Layers, flowRate, coldInTemp, preheatCapacity, rheem80Capacity,
   currentShuttleR, leftPortIsHot, tTanklessActual, setpoint, tankFlow, tanklessFlow, isTanklessLimited,
@@ -376,6 +382,9 @@ function App() {
   const bathBTU = 60 * 8.34 * Math.max(0, setpoint - coldInTemp);   // 60 gal tub
   const storedShowers = showerBTU > 0 ? totalStoredBTU / showerBTU : Infinity;
   const storedBaths = bathBTU > 0 ? totalStoredBTU / bathBTU : Infinity;
+  const rheemDeficitBTU = rheem80Layers.reduce((sum: number, t: number) =>
+    sum + gallonsPerRheemLayer * 8.34 * Math.max(0, rheemTargetTemp - t), 0);
+  const estRecoveryHours = effectiveRheemBTUh > 0 ? rheemDeficitBTU / effectiveRheemBTUh : Infinity;
   const formatTime = (seconds: number) => {
     if (!isFinite(seconds) || seconds < 0) return '';
     const h = Math.floor(seconds / 3600);
@@ -411,24 +420,24 @@ function App() {
             <div style={{ background: '#18181b', padding: '2rem', borderRadius: '1rem', border: '1px solid #3f3f46' }}>
               <h3 style={{ marginTop: 0, marginBottom: '1.5rem', fontSize: '1.1rem' }}>Simulation Controls</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Output Demand: <span style={{ color: '#fafafa' }}>{flowRate.toFixed(1)} GPM</span></label><input type="range" min="0" max="20" step="0.1" value={flowRate} onChange={e => setFlowRate(parseFloat(e.target.value))} style={sliderStyle} /></div>
-                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Cold Inlet Temp: <span style={{ color: '#fafafa' }}>{coldInTemp}°F</span></label><input type="range" min="35" max="80" value={coldInTemp} onChange={e => setColdInTemp(parseInt(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Output Demand<Tip text="Simulated faucet flow rate in gallons per minute" />: <span style={{ color: '#fafafa' }}>{flowRate.toFixed(1)} GPM</span></label><input type="range" min="0" max="20" step="0.1" value={flowRate} onChange={e => setFlowRate(parseFloat(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Cold Inlet Temp<Tip text="Temperature of the incoming municipal cold water supply" />: <span style={{ color: '#fafafa' }}>{coldInTemp}°F</span></label><input type="range" min="35" max="80" value={coldInTemp} onChange={e => setColdInTemp(parseInt(e.target.value))} style={sliderStyle} /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}>
-                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Preheat Tank Target: <span style={{ color: '#fafafa' }}>{preheatTargetTemp}°F</span></label><input type="range" min="70" max="130" value={preheatTargetTemp} onChange={e => setPreheatTargetTemp(parseInt(e.target.value))} style={sliderStyle} /></div>
-                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Water Heater Target: <span style={{ color: '#fafafa' }}>{rheemTargetTemp}°F</span></label><input type="range" min="100" max="160" value={rheemTargetTemp} onChange={e => setRheemTargetTemp(parseInt(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Preheat Tank Target<Tip text="Thermostat setpoint for the preheat tank's heat pump loop" />: <span style={{ color: '#fafafa' }}>{preheatTargetTemp}°F</span></label><input type="range" min="70" max="130" value={preheatTargetTemp} onChange={e => setPreheatTargetTemp(parseInt(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Water Heater Target<Tip text="Thermostat setpoint for the Rheem heat pump water heater" />: <span style={{ color: '#fafafa' }}>{rheemTargetTemp}°F</span></label><input type="range" min="100" max="160" value={rheemTargetTemp} onChange={e => setRheemTargetTemp(parseInt(e.target.value))} style={sliderStyle} /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}>
-                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Preheat Recovery: <span style={{ color: '#fafafa' }}>{formatBTU(preheatBTUhSetting)} BTU/h ({preheatRecoveryRate.toFixed(0)} GPH)</span></label><input type="range" min="5000" max="60000" step="100" value={preheatBTUhSetting} onChange={e => setPreheatBTUhSetting(parseInt(e.target.value))} style={sliderStyle} /></div>
-                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Rheem Recovery: <span style={{ color: '#fafafa' }}>{rheemRecoveryRate} GPH ({formatBTU(rheemBTUh)} BTU/h)</span></label><input type="range" min="1" max="30" value={rheemRecoveryRate} onChange={e => setRheemRecoveryRate(parseInt(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Preheat Recovery<Tip text="Heat input rate of the preheat loop's heat pump, in BTU/hr" />: <span style={{ color: '#fafafa' }}>{formatBTU(preheatBTUhSetting)} BTU/h ({preheatRecoveryRate.toFixed(0)} GPH)</span></label><input type="range" min="5000" max="60000" step="100" value={preheatBTUhSetting} onChange={e => setPreheatBTUhSetting(parseInt(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Rheem Recovery<Tip text="Recovery rate of the Rheem in heat-pump-only mode, in gallons per hour" />: <span style={{ color: '#fafafa' }}>{rheemRecoveryRate} GPH ({formatBTU(rheemBTUh)} BTU/h)</span></label><input type="range" min="1" max="30" value={rheemRecoveryRate} onChange={e => setRheemRecoveryRate(parseInt(e.target.value))} style={sliderStyle} /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}>
-                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Mixing Valve Setpoint: <span style={{ color: '#fafafa' }}>{setpoint}°F</span></label><input type="range" min="85" max="160" value={setpoint} onChange={e => setSetpoint(parseInt(e.target.value))} style={sliderStyle} /></div>
-                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Tankless Output: <span style={{ color: '#fafafa' }}>{tanklessSetpoint}°F</span></label><input type="range" min="100" max="160" value={tanklessSetpoint} onChange={e => setTanklessSetpoint(parseInt(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Mixing Valve Setpoint<Tip text="Target output temperature of the Apollo thermostatic mixing valve" />: <span style={{ color: '#fafafa' }}>{setpoint}°F</span></label><input type="range" min="85" max="160" value={setpoint} onChange={e => setSetpoint(parseInt(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Tankless Output<Tip text="Temperature setpoint of the Rinnai tankless water heater" />: <span style={{ color: '#fafafa' }}>{tanklessSetpoint}°F</span></label><input type="range" min="100" max="160" value={tanklessSetpoint} onChange={e => setTanklessSetpoint(parseInt(e.target.value))} style={sliderStyle} /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}>
-                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Upstairs Loop ΔT: <span style={{ color: '#fafafa' }}>{upstairsLoopDeltaT}°F</span></label><input type="range" min="0" max="15" step="0.5" value={upstairsLoopDeltaT} onChange={e => setUpstairsLoopDeltaT(parseFloat(e.target.value))} style={sliderStyle} /></div>
-                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Main/Bsmt Loop ΔT: <span style={{ color: '#fafafa' }}>{mainBsmtLoopDeltaT}°F</span></label><input type="range" min="0" max="15" step="0.5" value={mainBsmtLoopDeltaT} onChange={e => setMainBsmtLoopDeltaT(parseFloat(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Upstairs Loop ΔT<Tip text="Temperature drop through the upstairs recirculation piping loop" />: <span style={{ color: '#fafafa' }}>{upstairsLoopDeltaT}°F</span></label><input type="range" min="0" max="15" step="0.5" value={upstairsLoopDeltaT} onChange={e => setUpstairsLoopDeltaT(parseFloat(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Main/Bsmt Loop ΔT<Tip text="Temperature drop through the main floor and basement recirculation piping loop" />: <span style={{ color: '#fafafa' }}>{mainBsmtLoopDeltaT}°F</span></label><input type="range" min="0" max="15" step="0.5" value={mainBsmtLoopDeltaT} onChange={e => setMainBsmtLoopDeltaT(parseFloat(e.target.value))} style={sliderStyle} /></div>
               </div>
             </div>
           </div>
@@ -444,15 +453,15 @@ function App() {
               </div>
             </div>
             <div style={{ background: '#27272a', padding: '1.5rem', borderRadius: '1rem', fontSize: '0.875rem', lineHeight: 1.6 }}>
-              <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#18181b', borderRadius: '0.5rem', border: '1px solid #3f3f46', textAlign: 'center' }}><span style={{ fontSize: '0.75rem', color: '#a1a1aa', display: 'block', marginBottom: '0.25rem' }}>ESTIMATED HOT WATER REMAINING</span><span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: minutesRemaining === Infinity ? '#22c55e' : minutesRemaining < 5 ? '#ef4444' : '#f97316' }}>{minutesRemaining === Infinity ? 'Infinite (Stable)' : formatTime(minutesRemaining * 60)}</span></div>
+              <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#18181b', borderRadius: '0.5rem', border: '1px solid #3f3f46', textAlign: 'center' }}><span style={{ fontSize: '0.75rem', color: '#a1a1aa', display: 'block', marginBottom: '0.25rem' }}>ESTIMATED HOT WATER REMAINING<Tip text="Time until stored tank energy is depleted at the current demand rate" /></span><span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: minutesRemaining === Infinity ? '#22c55e' : minutesRemaining < 5 ? '#ef4444' : '#f97316' }}>{minutesRemaining === Infinity ? 'Infinite (Stable)' : formatTime(minutesRemaining * 60)}</span></div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
                 <div style={{ background: '#18181b', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #3f3f46', textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>System Capacity</span>
+                  <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>System Capacity<Tip text="Maximum GPM the system can deliver at the mixing valve setpoint, combining all heat sources minus recirculation losses" /></span>
                   <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#f4f4f5' }}>{maxSystemGPM.toFixed(1)} GPM</span>
                   <span style={{ fontSize: '0.6rem', color: '#71717a', display: 'block' }}>@ {setpoint}°F Output</span>
                 </div>
                 <div style={{ background: '#18181b', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #3f3f46', textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Optimal Flow</span>
+                  <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Optimal Flow<Tip text="Maximum sustainable GPM from tank recovery alone, without activating the tankless heater" /></span>
                   <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#86efac' }}>{maxOptimalGPM.toFixed(1)} GPM</span>
                   <span style={{ fontSize: '0.6rem', color: '#71717a', display: 'block' }}>Sustainable Tank-Only</span>
                 </div>
@@ -485,42 +494,56 @@ function App() {
             <h3 style={{ marginTop: 0, fontSize: '0.875rem', textTransform: 'uppercase', color: '#a1a1aa', marginBottom: '1rem' }}>Energy Balance (BTU)</h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
               <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
-                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Preheat Recovery</span>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Preheat Recovery<Tip text="BTU/hr the preheat tank's heat pump loop adds to incoming cold water" /></span>
                 <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#93c5fd' }}>{formatBTU(preheatBTUh)} BTU/h</span>
               </div>
               <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
-                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Rheem Recovery</span>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Rheem Recovery<Tip text="BTU/hr the Rheem heat pump water heater adds in HP-only mode" /></span>
                 <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#93c5fd' }}>{formatBTU(rheemBTUh)} BTU/h</span>
               </div>
               <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
-                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Tankless Max</span>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Tankless Max<Tip text="Maximum BTU/hr the Rinnai tankless can deliver at full capacity" /></span>
                 <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#93c5fd' }}>{formatBTU(tanklessBTUh)} BTU/h</span>
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
               <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
-                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Preheat Stored</span>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Preheat Stored<Tip text="Thermal energy currently stored in the preheat tank above cold inlet temperature" /></span>
                 <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#f59e0b' }}>{formatBTU(preheatStoredBTU)} BTU</span>
               </div>
               <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
-                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Rheem Stored</span>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Rheem Stored<Tip text="Thermal energy currently stored in the Rheem tank above cold inlet temperature" /></span>
                 <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#f59e0b' }}>{formatBTU(rheemStoredBTU)} BTU</span>
               </div>
               <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
-                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Total Stored</span>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Total Stored<Tip text="Combined stored energy in both tanks; shown as equivalent showers (25 gal) and baths (60 gal)" /></span>
                 <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#f59e0b' }}>{formatBTU(totalStoredBTU)} BTU</span>
                 <span style={{ fontSize: '0.7rem', color: '#a1a1aa', display: 'block' }}>{storedTimeH === Infinity ? 'No demand' : `${formatTime(storedTimeH * 3600)} at current demand`}</span>
                 <span style={{ fontSize: '0.7rem', color: '#a1a1aa', display: 'block' }}>{storedShowers.toFixed(1)} showers · {storedBaths.toFixed(1)} baths</span>
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
               <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
-                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Tank Recovery Total</span>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Tank Recovery Total<Tip text="Combined BTU/hr from both tanks' recovery systems" /></span>
                 <span style={{ fontSize: '1rem', fontWeight: 'bold', color: tankedBTUh >= demandBTUh ? '#22c55e' : '#f59e0b' }}>{formatBTU(tankedBTUh)} BTU/h</span>
               </div>
               <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
-                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Output Demand</span>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Output Demand<Tip text="BTU/hr being consumed by the current faucet flow at the mixed output temperature" /></span>
                 <span style={{ fontSize: '1rem', fontWeight: 'bold', color: demandBTUh > tankedBTUh ? '#ef4444' : '#22c55e' }}>{formatBTU(demandBTUh)} BTU/h</span>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Recirculation Loss<Tip text="BTU/hr lost through pipe heat dissipation in the recirculation loops" /></span>
+                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: '#f59e0b' }}>{formatBTU(recircParasiticBTU)} BTU/h</span>
+              </div>
+              <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Net Rheem Recovery<Tip text="Rheem recovery BTU/hr minus recirculation losses — the effective heating rate" /></span>
+                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: effectiveRheemBTUh > 0 ? '#22c55e' : '#ef4444' }}>{formatBTU(effectiveRheemBTUh)} BTU/h</span>
+              </div>
+              <div style={{ background: '#27272a', padding: '0.75rem', borderRadius: '0.5rem', textAlign: 'center' }}>
+                <span style={{ fontSize: '0.65rem', color: '#a1a1aa', display: 'block', textTransform: 'uppercase' }}>Rheem Recovery ETA<Tip text="Estimated time for the Rheem tank to reach its target temperature at the current net recovery rate" /></span>
+                <span style={{ fontSize: '1rem', fontWeight: 'bold', color: rheemDeficitBTU < 1 ? '#22c55e' : '#f59e0b' }}>{rheemDeficitBTU < 1 ? 'At target' : !isFinite(estRecoveryHours) ? 'Never' : formatTime(estRecoveryHours * 3600)}</span>
               </div>
             </div>
           </div>
