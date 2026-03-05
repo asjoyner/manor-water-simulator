@@ -209,6 +209,8 @@ function App() {
   // Pump toggle state (upstairs defaults off, main/bsmt defaults on)
   const [upstairsPumpOn, setUpstairsPumpOn] = useState(false);
   const [mainBsmtPumpOn, setMainBsmtPumpOn] = useState(true);
+  const [upstairsLoopDeltaT, setUpstairsLoopDeltaT] = useState(4);
+  const [mainBsmtLoopDeltaT, setMainBsmtLoopDeltaT] = useState(4);
   const RECIRC_FLOW_GPM = (upstairsPumpOn ? 0.5 : 0) + (mainBsmtPumpOn ? 0.5 : 0);
 
   // Preheat + Rheem state
@@ -275,8 +277,17 @@ function App() {
       // Step 2: Rheem — blended input from preheat output + recirc return
       const preheatOutTemp = nextPreheat[0];
       const totalWHFlow = flowRate + RECIRC_FLOW_GPM;
+
+      // Apply pipe heat loss to each recirc loop
+      const upstairsFlow = upstairsPumpOn ? 0.5 : 0;
+      const mainBsmtFlow = mainBsmtPumpOn ? 0.5 : 0;
+      const recircReturnTemp = RECIRC_FLOW_GPM > 0
+        ? ((prevMixed - upstairsLoopDeltaT) * upstairsFlow
+         + (prevMixed - mainBsmtLoopDeltaT) * mainBsmtFlow) / RECIRC_FLOW_GPM
+        : prevMixed;
+
       const blendedInTemp = totalWHFlow > 0
-        ? (preheatOutTemp * flowRate + prevMixed * RECIRC_FLOW_GPM) / totalWHFlow
+        ? (preheatOutTemp * flowRate + recircReturnTemp * RECIRC_FLOW_GPM) / totalWHFlow
         : preheatOutTemp;
       const nextRheem = calculateStratifiedTankStep(
         rLayers, rheem80Capacity, totalWHFlow, blendedInTemp,
@@ -300,7 +311,8 @@ function App() {
     }, tickRateMs);
     return () => clearInterval(timer);
   }, [simSpeed, flowRate, preheatCapacity, rheem80Capacity, preheatRecoveryRate, rheemRecoveryRate,
-      preheatTargetTemp, rheemTargetTemp, coldInTemp, tanklessSetpoint, setpoint, leftPortIsHot, RECIRC_FLOW_GPM]);
+      preheatTargetTemp, rheemTargetTemp, coldInTemp, tanklessSetpoint, setpoint, leftPortIsHot,
+      RECIRC_FLOW_GPM, upstairsPumpOn, mainBsmtPumpOn, upstairsLoopDeltaT, mainBsmtLoopDeltaT]);
 
   // Derived values
   const rheemOut = rheem80Layers[0];
@@ -400,6 +412,10 @@ function App() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}>
                 <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Mixing Valve Setpoint: <span style={{ color: '#fafafa' }}>{setpoint}°F</span></label><input type="range" min="85" max="160" value={setpoint} onChange={e => setSetpoint(parseInt(e.target.value))} style={sliderStyle} /></div>
                 <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Tankless Output: <span style={{ color: '#fafafa' }}>{tanklessSetpoint}°F</span></label><input type="range" min="100" max="160" value={tanklessSetpoint} onChange={e => setTanklessSetpoint(parseInt(e.target.value))} style={sliderStyle} /></div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Upstairs Loop ΔT: <span style={{ color: '#fafafa' }}>{upstairsLoopDeltaT}°F</span></label><input type="range" min="0" max="15" step="0.5" value={upstairsLoopDeltaT} onChange={e => setUpstairsLoopDeltaT(parseFloat(e.target.value))} style={sliderStyle} /></div>
+                <div><label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa' }}>Main/Bsmt Loop ΔT: <span style={{ color: '#fafafa' }}>{mainBsmtLoopDeltaT}°F</span></label><input type="range" min="0" max="15" step="0.5" value={mainBsmtLoopDeltaT} onChange={e => setMainBsmtLoopDeltaT(parseFloat(e.target.value))} style={sliderStyle} /></div>
               </div>
             </div>
           </div>
