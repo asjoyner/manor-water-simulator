@@ -91,11 +91,11 @@ const PlumbingDiagram = ({
         <text x="178" y="115" textAnchor="middle" fill={getTempColor(preheatOut)} fontSize="8" fontWeight="bold">{preheatOut.toFixed(0)}°F</text>
 
         {/* ===== PREHEAT → RHEEM (down to bottom inlet) ===== */}
-        <path d="M 195 120 L 195 210 L 220 210" fill="none" stroke={getTempColor(preheatOut)} strokeWidth="4" />
-        {flowRate > 0 && <path d="M 195 120 L 195 210 L 220 210" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
+        <path d="M 195 120 L 195 200 L 220 200" fill="none" stroke={getTempColor(preheatOut)} strokeWidth="4" />
+        {flowRate > 0 && <path d="M 195 120 L 195 200 L 220 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(flowRate) }} />}
 
         {/* ===== INPUT TEE (recirc return joins at bottom) ===== */}
-        <circle cx="195" cy="210" r="4" fill="#52525b" />
+        <circle cx="195" cy="200" r="4" fill="#52525b" />
 
         {/* ===== RHEEM HEAT PUMP WATER HEATER (same level as preheat) ===== */}
         <rect x="220" y="110" width="60" height="100" rx="5" fill="#27272a" stroke="#3f3f46" strokeWidth="2" />
@@ -113,7 +113,7 @@ const PlumbingDiagram = ({
         <circle cx="310" cy="130" r="4" fill="#52525b" />
 
         {/* ===== BYPASS PATH: TEE → straight to valve upper port ===== */}
-        <path d="M 310 130 L 450 130" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="8" />
+        <path d="M 310 130 L 450 130" fill="none" stroke={getTempColor(rheemOut)} strokeWidth="4" />
         {tankFlow > 0.1 && <path d="M 310 130 L 450 130" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tankFlow) }} />}
         <text x="380" y="124" textAnchor="middle" fill={getTempColor(rheemOut)} fontSize="8" fontWeight="bold">{rheemOut.toFixed(0)}°F</text>
 
@@ -128,7 +128,7 @@ const PlumbingDiagram = ({
         <text x="390" y="203" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">{tTanklessActual.toFixed(1)}°F</text>
 
         {/* ===== TANKLESS → VALVE LOWER PORT (straight line) ===== */}
-        <path d="M 420 198 L 450 198" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="8" />
+        <path d="M 420 198 L 450 198" fill="none" stroke={getTempColor(tTanklessActual)} strokeWidth="4" />
         {tanklessFlow > 0.1 && <path d="M 420 198 L 450 198" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(tanklessFlow) }} />}
         <text x="435" y="212" textAnchor="middle" fill={getTempColor(tTanklessActual)} fontSize="8" fontWeight="bold">{tTanklessActual.toFixed(0)}°F</text>
 
@@ -193,8 +193,8 @@ const PlumbingDiagram = ({
 
         {/* ===== RECIRC RETURN ===== */}
         {/* Pump 1 output exits left → return trunk */}
-        <path d="M 542 210 L 530 210 L 530 250 L 195 250 L 195 210" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
-        {recircFlow > 0 && <path d="M 542 210 L 530 210 L 530 250 L 195 250 L 195 210" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
+        <path d="M 542 210 L 530 210 L 530 250 L 195 250 L 195 200" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
+        {recircFlow > 0 && <path d="M 542 210 L 530 210 L 530 250 L 195 250 L 195 200" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
         {/* Pump 2 output exits left → joins trunk */}
         <path d="M 542 240 L 530 240 L 530 250" fill="none" stroke={mixedColor} strokeWidth="3" opacity="0.5" strokeDasharray="8 4" />
         {recircFlow > 0 && <path d="M 542 240 L 530 240 L 530 250" fill="none" stroke="white" strokeWidth="2" className="flow-line" style={{ animationDuration: animDur(recircFlow) }} />}
