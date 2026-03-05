@@ -26,7 +26,7 @@ const Tip = ({ text }: { text: string }) => {
       {open && <span onClick={(e) => { e.stopPropagation(); setOpen(false); }} style={{ position: 'absolute',
         bottom: '120%', left: '50%', transform: 'translateX(-50%)', background: '#27272a',
         border: '1px solid #3f3f46', borderRadius: 6, padding: '6px 10px', fontSize: '0.75rem',
-        color: '#e4e4e7', width: 220, zIndex: 100, lineHeight: 1.4, cursor: 'pointer',
+        color: '#e4e4e7', width: 220, zIndex: 100, lineHeight: 1.4, cursor: 'pointer', textTransform: 'none' as const,
         boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>{text}</span>}
     </span>
   );
