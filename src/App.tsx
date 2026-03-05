@@ -228,7 +228,7 @@ function App() {
   const [preheatBTUhSetting, setPreheatBTUhSetting] = useState(39900);
   const preheatRecoveryRate = preheatBTUhSetting / (8.34 * Math.max(1, preheatTargetTemp - coldInTemp));
   const [rheemRecoveryRate, setRheemRecoveryRate] = useState(7);
-  const [preheatLayers, setPreheatLayers] = useState(new Array(10).fill(100));
+  const [preheatLayers, setPreheatLayers] = useState(new Array(10).fill(preheatTargetTemp));
   const [rheem80Layers, setRheem80Layers] = useState(new Array(10).fill(135));
 
   // Tankless + mixing valve state (from original)
