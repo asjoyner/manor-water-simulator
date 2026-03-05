@@ -281,61 +281,75 @@ function App() {
       const stepSeconds = (tickRateMs / 1000) * simSpeed;
       setElapsedSeconds(prev => prev + stepSeconds);
       setGallonsDispensed(prev => prev + flowRate * stepSeconds / 60);
-      const { preheatLayers: pLayers, rheem80Layers: rLayers, currentShuttleR: r, currentTanklessActual: tL } = stateRef.current;
 
-      // Step 1: Preheat tank — cold water in, heated by heat pump loop
-      const nextPreheat = calculateStratifiedTankStep(
-        pLayers, preheatCapacity, flowRate, coldInTemp,
-        preheatRecoveryRate, preheatTargetTemp, stepSeconds
-      );
-      setPreheatLayers(nextPreheat);
+      // Sub-step the coupled simulation to prevent valve-tankless oscillation.
+      // At high sim speeds (300x → 30s steps), the valve converges against stale
+      // tankless data, causing overshoot. Capping at 1s keeps them coupled.
+      const maxSubStep = 1;
+      const numSubSteps = Math.max(1, Math.ceil(stepSeconds / maxSubStep));
+      const subStep = stepSeconds / numSubSteps;
 
-      // Compute previous recirc return temp from prior state
-      const prevRheemOut = rLayers[0];
-      const prevTH = leftPortIsHot ? prevRheemOut : tL;
-      const prevTC = leftPortIsHot ? tL : prevRheemOut;
-      const prevMixed = r * prevTH + (1 - r) * prevTC;
+      let pL = stateRef.current.preheatLayers;
+      let rL = stateRef.current.rheem80Layers;
+      let shuttleR = stateRef.current.currentShuttleR;
+      let tanklessTemp = stateRef.current.currentTanklessActual;
+      let tanklessLimited = false;
 
-      // Step 2: Rheem — blended input from preheat output + recirc return
-      const preheatOutTemp = nextPreheat[0];
-      const totalWHFlow = flowRate + RECIRC_FLOW_GPM;
+      for (let ss = 0; ss < numSubSteps; ss++) {
+        // Step 1: Preheat tank — cold water in, heated by heat pump loop
+        pL = calculateStratifiedTankStep(
+          pL, preheatCapacity, flowRate, coldInTemp,
+          preheatRecoveryRate, preheatTargetTemp, subStep
+        );
 
-      // Apply pipe heat loss to each recirc loop
-      const upstairsFlow = upstairsPumpOn ? 0.5 : 0;
-      const mainBsmtFlow = mainBsmtPumpOn ? 0.5 : 0;
-      const recircReturnTemp = RECIRC_FLOW_GPM > 0
-        ? ((prevMixed - upstairsLoopDeltaT) * upstairsFlow
-         + (prevMixed - mainBsmtLoopDeltaT) * mainBsmtFlow) / RECIRC_FLOW_GPM
-        : prevMixed;
+        // Compute recirc return temp from current sub-step state
+        const curRheemOut = rL[0];
+        const curTH = leftPortIsHot ? curRheemOut : tanklessTemp;
+        const curTC = leftPortIsHot ? tanklessTemp : curRheemOut;
+        const curMixed = shuttleR * curTH + (1 - shuttleR) * curTC;
 
-      const blendedInTemp = totalWHFlow > 0
-        ? (preheatOutTemp * flowRate + recircReturnTemp * RECIRC_FLOW_GPM) / totalWHFlow
-        : preheatOutTemp;
-      // Rheem recovery is rated at (rheemTargetTemp - coldInTemp) delta.
-      // Scale GPH so BTU/hr stays constant when inlet is warmer than cold supply.
-      const rheemRefDegGalPerHr = rheemRecoveryRate * Math.max(0, rheemTargetTemp - coldInTemp);
-      const rheemInletDelta = Math.max(1, rheemTargetTemp - blendedInTemp);
-      const effectiveRheemRecovery = rheemRefDegGalPerHr / rheemInletDelta;
+        // Step 2: Rheem — blended input from preheat output + recirc return
+        const preheatOutTemp = pL[0];
+        const totalWHFlow = flowRate + RECIRC_FLOW_GPM;
 
-      const nextRheem = calculateStratifiedTankStep(
-        rLayers, rheem80Capacity, totalWHFlow, blendedInTemp,
-        effectiveRheemRecovery, rheemTargetTemp, stepSeconds
-      );
-      setRheem80Layers(nextRheem);
+        const upstairsFlow = upstairsPumpOn ? 0.5 : 0;
+        const mainBsmtFlow = mainBsmtPumpOn ? 0.5 : 0;
+        const recircReturnTemp = RECIRC_FLOW_GPM > 0
+          ? ((curMixed - upstairsLoopDeltaT) * upstairsFlow
+           + (curMixed - mainBsmtLoopDeltaT) * mainBsmtFlow) / RECIRC_FLOW_GPM
+          : curMixed;
 
-      // Step 3: Mixing valve — Rheem output on one port, tankless on other
-      const rheemOutTemp = nextRheem[0];
-      const tH = leftPortIsHot ? rheemOutTemp : tL;
-      const tC = leftPortIsHot ? tL : rheemOutTemp;
-      const nextShuttleR = calculatePhysicalShuttleStep(r, tH, tC, setpoint, stepSeconds);
-      setCurrentShuttleR(nextShuttleR);
+        const blendedInTemp = totalWHFlow > 0
+          ? (preheatOutTemp * flowRate + recircReturnTemp * RECIRC_FLOW_GPM) / totalWHFlow
+          : preheatOutTemp;
+        const rheemRefDegGalPerHr = rheemRecoveryRate * Math.max(0, rheemTargetTemp - coldInTemp);
+        const rheemInletDelta = Math.max(1, rheemTargetTemp - blendedInTemp);
+        const effectiveRheemRecovery = rheemRefDegGalPerHr / rheemInletDelta;
 
-      // Step 4: Tankless — receives fraction of total flow through valve (demand + recirc)
-      const totalValveFlow = flowRate + RECIRC_FLOW_GPM;
-      const tanklessFlowVal = leftPortIsHot ? ((1 - nextShuttleR) * totalValveFlow) : (nextShuttleR * totalValveFlow);
-      const tanklessResult = calculateTanklessStep(tanklessSetpoint, tanklessFlowVal, rheemOutTemp);
-      setCurrentTanklessActual(tanklessResult.temp);
-      setIsTanklessLimited(tanklessResult.isBTULimited);
+        rL = calculateStratifiedTankStep(
+          rL, rheem80Capacity, totalWHFlow, blendedInTemp,
+          effectiveRheemRecovery, rheemTargetTemp, subStep
+        );
+
+        // Step 3: Mixing valve — Rheem output on one port, tankless on other
+        const rheemOutTemp = rL[0];
+        const tH = leftPortIsHot ? rheemOutTemp : tanklessTemp;
+        const tC = leftPortIsHot ? tanklessTemp : rheemOutTemp;
+        shuttleR = calculatePhysicalShuttleStep(shuttleR, tH, tC, setpoint, subStep);
+
+        // Step 4: Tankless — receives fraction of total flow through valve
+        const totalValveFlow = flowRate + RECIRC_FLOW_GPM;
+        const tanklessFlowVal = leftPortIsHot ? ((1 - shuttleR) * totalValveFlow) : (shuttleR * totalValveFlow);
+        const tanklessResult = calculateTanklessStep(tanklessSetpoint, tanklessFlowVal, rheemOutTemp);
+        tanklessTemp = tanklessResult.temp;
+        tanklessLimited = tanklessResult.isBTULimited;
+      }
+
+      setPreheatLayers(pL);
+      setRheem80Layers(rL);
+      setCurrentShuttleR(shuttleR);
+      setCurrentTanklessActual(tanklessTemp);
+      setIsTanklessLimited(tanklessLimited);
     }, tickRateMs);
     return () => clearInterval(timer);
   }, [simSpeed, flowRate, preheatCapacity, rheem80Capacity, preheatRecoveryRate, rheemRecoveryRate,
