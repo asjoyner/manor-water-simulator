@@ -157,7 +157,7 @@ const PlumbingDiagram = ({
           {/* Hose bib body */}
           <rect x="568" y="95" width="14" height="14" rx="3" fill={faucetOn ? '#1e3a5f' : '#27272a'} stroke={faucetOn ? mixedColor : '#3f3f46'} strokeWidth="1.5" />
           {/* Circular handle on top */}
-          <circle cx="575" cy="88" r="7" fill="none" stroke={faucetOn ? mixedColor : '#3f3f46'} strokeWidth="2" />
+          <circle cx="575" cy="88" r="7" fill="transparent" stroke={faucetOn ? mixedColor : '#3f3f46'} strokeWidth="2" />
           <circle cx="575" cy="88" r="2" fill={faucetOn ? mixedColor : '#52525b'} />
           {/* Spout pointing right */}
           <path d="M 582 102 L 595 102 L 595 106" fill="none" stroke={faucetOn ? mixedColor : '#3f3f46'} strokeWidth="2.5" strokeLinecap="round" />
