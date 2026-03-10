@@ -593,8 +593,8 @@ function App() {
       <footer style={{ marginTop: '2rem', textAlign: 'center', padding: '1rem 0', borderTop: '1px solid #27272a' }}>
         <a href="https://github.com/asjoyner/manor-water-simulator" target="_blank" rel="noopener noreferrer" style={{ color: '#a1a1aa', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 600 }}>github.com/asjoyner/manor-water-simulator</a>
         <div style={{ color: '#71717a', fontSize: '0.75rem', marginTop: '0.5rem' }}>
-          <span>commit: {__COMMIT_HASH__} ({new Date(__COMMIT_DATE__).toLocaleString()})</span>
-          <span style={{ marginLeft: '1rem' }}>build: {new Date(__BUILD_DATE__).toLocaleString()}</span>
+          <span>commit: {__COMMIT_HASH__} ({__COMMIT_DATE__})</span>
+          <span style={{ marginLeft: '1rem' }}>build: {__BUILD_DATE__}</span>
         </div>
       </footer>
     </div>
