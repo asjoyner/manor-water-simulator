@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { calculateStratifiedTankStep, calculatePhysicalShuttleStep, calculateTanklessStep, calculateMinutesRemaining } from './models/ValveModel';
 
+declare const __COMMIT_HASH__: string;
+declare const __COMMIT_DATE__: string;
+declare const __BUILD_DATE__: string;
+
 const getTempColor = (t: number) => {
   if (t <= 60) return '#3b82f6';
   if (t >= 140) return '#ef4444';
@@ -588,7 +592,10 @@ function App() {
       </div>
       <footer style={{ marginTop: '2rem', textAlign: 'center', padding: '1rem 0', borderTop: '1px solid #27272a' }}>
         <a href="https://github.com/asjoyner/manor-water-simulator" target="_blank" rel="noopener noreferrer" style={{ color: '#a1a1aa', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 600 }}>github.com/asjoyner/manor-water-simulator</a>
-        <span style={{ color: '#71717a', fontSize: '0.75rem', marginLeft: '1rem' }}>({__COMMIT_HASH__})</span>
+        <div style={{ color: '#71717a', fontSize: '0.75rem', marginTop: '0.5rem' }}>
+          <span>commit: {__COMMIT_HASH__} ({new Date(__COMMIT_DATE__).toLocaleString()})</span>
+          <span style={{ marginLeft: '1rem' }}>build: {new Date(__BUILD_DATE__).toLocaleString()}</span>
+        </div>
       </footer>
     </div>
   );
