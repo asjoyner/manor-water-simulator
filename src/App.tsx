@@ -91,7 +91,7 @@ const PlumbingDiagram = ({
         <text x="75" y="248" fill={getTempColor(coldInTemp)} fontSize="10" fontWeight="bold">COLD IN</text>
         <text x="75" y="260" fill={getTempColor(coldInTemp)} fontSize="10" fontWeight="bold">{coldInTemp}°F</text>
 
-        {/* ===== HTP GL119 PREHEAT TANK ===== */}
+        {/* ===== HTP MSSU-80N PREHEAT TANK ===== */}
         <rect x="100" y="110" width="60" height="100" rx="5" fill="#27272a" stroke="#3f3f46" strokeWidth="2" />
         {preheatLayers.map((temp: number, i: number) => (
           <rect key={`p${i}`} x="105" y={115 + (i * 9)} width="50" height="9" fill={getTempColor(temp)} opacity="0.9" />
@@ -247,7 +247,7 @@ function App() {
   const [preheatTargetTemp, setPreheatTargetTemp] = useState(113);
   const [rheemTargetTemp, setRheemTargetTemp] = useState(135);
   const [coldInTemp, setColdInTemp] = useState(60);
-  const [preheatCapacity] = useState(119);
+  const [preheatCapacity] = useState(80);
   const [rheem80Capacity] = useState(80);
   const [preheatBTUhSetting, setPreheatBTUhSetting] = useState(39900);
   const preheatRecoveryRate = preheatBTUhSetting / (8.34 * Math.max(1, preheatTargetTemp - coldInTemp));

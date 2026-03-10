@@ -12,7 +12,7 @@ This is an interactive simulator for the hot water system at Joyner Manor.  It c
 
 
 ### Hardware this is based on
-- **HTP GL119** — 119-gallon indirect preheat tank, heated by non-potable ground-source loop
+- **HTP MSSU-80N** — 80-gallon indirect preheat tank, heated by non-potable ground-source loop
 - **Mitsubishi-Trane TPWFYP036AU141A** — VRF heat pump driving the preheat loop
 - **Grundfos UP15-29SF** — circulator pump for non-potable preheat loop
 - **Robin Wood 20-gallon buffer tank** — thermal buffer in the preheat loop
