@@ -17,6 +17,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "vitest run"
+    "test": "vitest run",
+    "build:renderer": "esbuild tools/render-live.tsx --bundle --platform=node --format=cjs --jsx=automatic --outfile=tools/render-live.cjs --log-level=error"
   }
 }

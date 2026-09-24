@@ -36,7 +36,7 @@ const Tip = ({ text }: { text: string }) => {
   );
 };
 
-const PlumbingDiagram = ({
+export const PlumbingDiagram = ({
   preheatLayers, rheem80Layers, flowRate, coldInTemp, preheatCapacity, rheem80Capacity,
   currentShuttleR, leftPortIsHot, tTanklessActual, tanklessSetpoint, setpoint, tankFlow, tanklessFlow, isTanklessLimited,
   totalFlow, recircFlow, upstairsPumpOn, mainBsmtPumpOn, onToggleUpstairs, onToggleMainBsmt,
