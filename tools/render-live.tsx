@@ -86,7 +86,12 @@ const layers = (top: number, bot: number) =>
   svg = svg.replace('</svg>',
     `<text x="598" y="277" text-anchor="end" fill="#52525b" font-size="6">${stamp}</text></svg>`);
 
-  fs.mkdirSync(require('path').dirname(OUT), { recursive: true });
+  const dir = require('path').dirname(OUT);
+  if (!fs.existsSync(dir)) {
+    console.error(`output dir ${dir} does not exist. Create it once with:\n` +
+                  `  sudo install -d -o claude -g claude ${dir}`);
+    process.exit(1);
+  }
   const tmp = OUT + '.tmp';
   fs.writeFileSync(tmp, svg);        // atomic swap so readers never see a partial file
   fs.renameSync(tmp, OUT);
