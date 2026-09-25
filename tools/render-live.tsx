@@ -79,6 +79,14 @@ const layers = (top: number, bot: number) =>
               .match(/<svg[\s\S]*<\/svg>/) || [''])[0];
   if (!svg) { console.error('no <svg> produced'); process.exit(1); }
 
+  // Give the SVG INTRINSIC dimensions. The component styles itself width:100%
+  // for in-page layout, but as a standalone <img>/background-image that resolves
+  // against no container and the browser renders nothing. Replace the style with
+  // explicit width/height matching the 600x280 viewBox (2x for crispness).
+  svg = svg.replace(
+    /<svg([^>]*?)style="[^"]*"/,
+    '<svg$1width="1200" height="560" xmlns="http://www.w3.org/2000/svg"');
+
   // Blank the un-sensored readouts (see header note).
   svg = svg.replace(/>(-?\d+(?:\.\d+)?)\s*(GPM|gal)</g, '>&#8212; $2<');
 
