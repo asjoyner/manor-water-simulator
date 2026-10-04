@@ -30,6 +30,18 @@ async function state(id: string): Promise<string | null> {
     return (await r.json() as any).state;
   } catch { return null; }
 }
+async function attr(id: string, name: string): Promise<number | null> {
+  try {
+    const r = await fetch(`${SERVER}/api/states/${id}`, {
+      headers: { Authorization: `Bearer ${TOKEN}` },
+    });
+    if (!r.ok) return null;
+    const v = (await r.json() as any).attributes?.[name];
+    const f = typeof v === 'number' ? v : parseFloat(v);
+    return Number.isFinite(f) ? f : null;
+  } catch { return null; }
+}
+
 const num = async (id: string, fb: number) => {
   const v = await state(id); const f = v === null ? NaN : parseFloat(v);
   return Number.isFinite(f) ? f : fb;
@@ -43,7 +55,17 @@ const layers = (top: number, bot: number) =>
   const upper   = await num('sensor.rheem_hpwh_upper_tank_temperature', 120);
   const lower   = await num('sensor.rheem_hpwh_lower_tank_temperature', 110);
   const coldIn  = await num('sensor.door_switches_dhw_cold_inlet', 72);
-  const preheat = await num('sensor.door_switches_dhw_tankless_input', coldIn);
+  // Preheat tank temperature comes from the AE-200 HOT WATER SYSTEM group, not
+  // from dhw_tankless_input. That probe sits AFTER the tee on the Rinnai branch,
+  // so with the Rinnai idle it is a dead leg reading several degrees low, and it
+  // is the channel most prone to the CWT module freezing (stuck 09-27 -> 10-02,
+  // and again since 10-02 07:37). The AE-200 value is the temperature the PWFY
+  // actually controls to, is published natively in F, and is polled live.
+  // Both moved together when the PWFY was restarted on 09-22 (76->98F AE-200,
+  // 75->91F probe), which is what establishes they track the same tank.
+  const preheat = (await attr('climate.mitsubishi_ae_200_geothermal_hot_water_system',
+                              'current_temperature'))
+                ?? await num('sensor.door_switches_dhw_tankless_input', coldIn);
   const tkless  = await num('sensor.door_switches_dhw_tankless_output', 138);
   const mixed   = await num('sensor.door_switches_dhw_mixing_valve_output', 125);
   const pumpL   = (await state('switch.recirc_loop_left'))  === 'on';
